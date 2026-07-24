@@ -1,18 +1,43 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+import '@/global.css';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { useEffect } from 'react';
+
+import { ListsProvider } from '@/state/lists-context';
+import { useTheme } from '@/hooks/use-theme';
 
 SplashScreen.preventAutoHideAsync();
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+function RootNavigator() {
+  const theme = useTheme();
+
+  useEffect(() => {
+    SplashScreen.hideAsync();
+  }, []);
+
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <Stack
+      screenOptions={{
+        headerStyle: { backgroundColor: theme.colors.surface },
+        headerTintColor: theme.colors.primary,
+        headerTitleStyle: { color: theme.colors.text },
+        contentStyle: { backgroundColor: theme.colors.background },
+      }}
+    >
+      <Stack.Screen name="index" options={{ title: 'Mis listas' }} />
+      <Stack.Screen name="lists/[listId]/index" options={{ title: 'Lista' }} />
+      <Stack.Screen name="lists/[listId]/schema" options={{ title: 'Esquema' }} />
+      <Stack.Screen name="lists/[listId]/items/new" options={{ title: 'Nuevo item' }} />
+      <Stack.Screen name="lists/[listId]/items/[itemId]" options={{ title: 'Editar item' }} />
+    </Stack>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <ListsProvider>
+      <RootNavigator />
+    </ListsProvider>
   );
 }

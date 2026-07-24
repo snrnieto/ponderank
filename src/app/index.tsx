@@ -1,98 +1,87 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter, type Href } from 'expo-router';
+import { useState } from 'react';
+import { Alert, FlatList, Pressable, StyleSheet, View } from 'react-native';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { Button } from '@/components/ui/button';
+import { Surface } from '@/components/ui/surface';
+import { Text } from '@/components/ui/text';
+import { TextInput } from '@/components/ui/text-input';
+import { useTheme } from '@/hooks/use-theme';
+import { useLists } from '@/state/lists-context';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
+export default function ListsIndexScreen() {
+  const { bundles, loading, createList, deleteList } = useLists();
+  const [name, setName] = useState('');
+  const router = useRouter();
+  const theme = useTheme();
+
+  async function onCreate() {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    const bundle = await createList(trimmed);
+    setName('');
+    router.push(`/lists/${bundle.list.id}` as Href);
   }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
+
+  function onDelete(listId: string, listName: string) {
+    Alert.alert('Eliminar lista', `¿Eliminar “${listName}”?`, [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Eliminar',
+        style: 'destructive',
+        onPress: () => {
+          void deleteList(listId);
+        },
+      },
+    ]);
   }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+    <View style={[styles.container, { padding: theme.spacing[4], gap: theme.spacing[4] }]}>
+      <Surface padded>
+        <Text variant="subtitle">Nueva lista</Text>
+        <View style={{ height: theme.spacing[3] }} />
+        <TextInput
+          value={name}
+          onChangeText={setName}
+          placeholder="Ej. Computadores"
+          onSubmitEditing={() => void onCreate()}
+        />
+        <View style={{ height: theme.spacing[3] }} />
+        <Button title="Crear" onPress={() => void onCreate()} />
+      </Surface>
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+      {loading ? (
+        <Text colorKey="textSecondary">Cargando…</Text>
+      ) : (
+        <FlatList
+          data={bundles}
+          keyExtractor={(item) => item.list.id}
+          contentContainerStyle={{ gap: theme.spacing[3] }}
+          ListEmptyComponent={<Text colorKey="textSecondary">No hay listas todavía.</Text>}
+          renderItem={({ item }) => (
+            <Pressable onPress={() => router.push(`/lists/${item.list.id}` as Href)}>
+              <Surface padded>
+                <Text variant="label">{item.list.name}</Text>
+                <Text colorKey="textSecondary" variant="caption">
+                  {item.items.length} items · {item.columns.length} columnas
+                </Text>
+                <View style={{ height: theme.spacing[2] }} />
+                <Button
+                  title="Eliminar"
+                  variant="danger"
+                  size="sm"
+                  onPress={() => onDelete(item.list.id, item.list.name)}
+                />
+              </Surface>
+            </Pressable>
+          )}
+        />
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
+  container: { flex: 1 },
 });
