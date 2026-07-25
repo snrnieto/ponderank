@@ -143,7 +143,7 @@ export default function SchemaScreen() {
       base.rank = {
         weight: 0,
         direction: 'lowerBetter',
-        target: { mode: 'custom', customValue: 0 },
+        target: { mode: 'min' },
       };
     }
     if (kind === 'calculated') {

@@ -41,7 +41,12 @@ export function ItemForm({ mode }: { mode: 'new' | 'edit' }) {
 
   const item = draft ?? baseItem;
   const editableColumns = bundle.columns.filter(
-    (c) => c.kind === 'text' || c.kind === 'number' || c.kind === 'image' || c.kind === 'category',
+    (c) =>
+      c.kind === 'text' ||
+      c.kind === 'number' ||
+      c.kind === 'image' ||
+      c.kind === 'category' ||
+      (c.kind === 'criterion' && !c.calc),
   );
 
   function setValue(columnId: string, value: FieldValue) {
@@ -100,9 +105,13 @@ export function ItemForm({ mode }: { mode: 'new' | 'edit' }) {
               ) : (
                 <TextInput
                   value={value == null ? '' : String(value)}
-                  keyboardType={column.kind === 'number' ? 'decimal-pad' : 'default'}
+                  keyboardType={
+                    column.kind === 'number' || column.kind === 'criterion'
+                      ? 'decimal-pad'
+                      : 'default'
+                  }
                   onChangeText={(text) => {
-                    if (column.kind === 'number') {
+                    if (column.kind === 'number' || column.kind === 'criterion') {
                       if (text.trim() === '') {
                         setValue(column.id, null);
                         return;
