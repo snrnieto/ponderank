@@ -1,5 +1,5 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import {
+  Platform,
   Pressable,
   StyleSheet,
   type PressableProps,
@@ -35,6 +35,8 @@ export function Button({
     size === 'sm' ? theme.components.buttonHeight - 8 : theme.components.buttonHeight;
   const borderRadius = pill ? theme.radius.full : theme.radius.md;
   const paddingHorizontal = theme.spacing[4];
+  const [from, to] = theme.gradients.brand;
+  const gradientCss = `linear-gradient(135deg, ${from}, ${to})`;
 
   const textColor =
     variant === 'primary' || variant === 'danger'
@@ -43,50 +45,22 @@ export function Button({
         ? theme.colors.primary
         : theme.colors.text;
 
-  if (variant === 'primary') {
-    return (
-      <Pressable
-        accessibilityRole="button"
-        disabled={disabled}
-        style={({ pressed }) => [
-          styles.base,
-          {
-            height,
-            borderRadius,
-            opacity: disabled ? 0.5 : pressed ? 0.9 : 1,
-            overflow: 'hidden',
-          },
-          style,
-        ]}
-        {...rest}
-      >
-        <LinearGradient
-          colors={[...theme.gradients.brand]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={[
-            styles.gradient,
-            {
-              height,
-              borderRadius,
-              paddingHorizontal,
-            },
-          ]}
-        >
-          <Text variant="label" color={textColor}>
-            {title}
-          </Text>
-        </LinearGradient>
-      </Pressable>
-    );
-  }
-
   const background =
-    variant === 'danger'
-      ? theme.colors.danger
-      : variant === 'secondary'
-        ? theme.colors.secondaryMuted
-        : 'transparent';
+    variant === 'primary'
+      ? theme.colors.primary
+      : variant === 'danger'
+        ? theme.colors.danger
+        : variant === 'secondary'
+          ? theme.colors.secondaryMuted
+          : 'transparent';
+
+  const gradientStyle =
+    variant === 'primary'
+      ? Platform.select<ViewStyle>({
+          web: { backgroundImage: gradientCss },
+          default: { experimental_backgroundImage: gradientCss },
+        })
+      : undefined;
 
   return (
     <Pressable
@@ -100,9 +74,10 @@ export function Button({
           backgroundColor: background,
           borderWidth: variant === 'ghost' ? StyleSheet.hairlineWidth : 0,
           borderColor: theme.colors.border,
-          opacity: disabled ? 0.5 : pressed ? 0.85 : 1,
+          opacity: disabled ? 0.5 : pressed ? 0.9 : 1,
           paddingHorizontal,
         },
+        gradientStyle,
         style,
       ]}
       {...rest}
@@ -110,6 +85,7 @@ export function Button({
       <Text
         variant="label"
         color={variant === 'secondary' ? theme.colors.secondary : textColor}
+        style={styles.label}
       >
         {title}
       </Text>
@@ -123,10 +99,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexDirection: 'row',
   },
-  gradient: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    width: '100%',
+  label: {
+    backgroundColor: 'transparent',
   },
 });

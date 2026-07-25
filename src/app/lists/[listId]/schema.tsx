@@ -8,7 +8,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  UIManager,
   View,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
@@ -35,10 +34,6 @@ import {
 import { useTheme } from '@/hooks/use-theme';
 import { safeGoBack } from '@/navigation/safe-go-back';
 import { useLists } from '@/state/lists-context';
-
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 const KIND_LABELS: Record<ListColumn['kind'], string> = {
   text: 'texto',

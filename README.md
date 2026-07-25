@@ -61,9 +61,9 @@ Flags (nativo):
 | --- | --- | --- | --- |
 | `--device` | Android / iOS | Instala en un dispositivo físico conectado (USB) en lugar del emulador/simulador | Quieres probar en teléfono real |
 | `--variant release` | Solo Android | Build de producción (JS embebido, sin Metro, optimizado) | Simular cómo se comporta la app publicada |
-| `--variant debug` | Solo Android | Build de desarrollo (puede conectar a Metro) | Depurar con hot reload en build nativo; es el default si omites `--variant` |
+| `--variant debug` | Solo Android | Build de desarrollo: carga el JS desde Metro en tu PC | Depurar con hot reload; default si omites `--variant`. **Requiere la PC encendida** con `pnpm start` |
 | `--configuration Release` | Solo iOS | Equivalente a `--variant release` en Xcode | Simular producción en iPhone |
-| `--configuration Debug` | Solo iOS | Equivalente a `--variant debug` | Depurar en build nativo; default si omites `--configuration` |
+| `--configuration Debug` | Solo iOS | Equivalente a `--variant debug` | Depurar en build nativo; default si omites `--configuration`. **También requiere Metro en la PC** |
 
 Sin `--device`, Expo usa emulador Android o simulador iOS si hay uno disponible.
 
