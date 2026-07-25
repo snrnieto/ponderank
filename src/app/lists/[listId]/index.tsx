@@ -7,6 +7,8 @@ import { FilterRecalcModal } from '@/components/list/filter-recalc-modal';
 import { RankingTable } from '@/components/list/ranking-table';
 import { ViewControlsModal } from '@/components/list/view-controls-modal';
 import { Button } from '@/components/ui/button';
+import { GradientCard } from '@/components/ui/gradient-card';
+import { PageShell } from '@/components/ui/page-shell';
 import { Text } from '@/components/ui/text';
 import { useTheme } from '@/hooks/use-theme';
 import { useLists } from '@/state/lists-context';
@@ -53,6 +55,8 @@ export default function ListDetailScreen() {
     [bundle],
   );
 
+  const leader = view.rows[0];
+
   if (!bundle) {
     return (
       <View style={[styles.center, { padding: theme.spacing[4] }]}>
@@ -63,27 +67,65 @@ export default function ListDetailScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={{ padding: theme.spacing[4], gap: theme.spacing[3] }}>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing[2] }}>
-        <Button
-          title="Esquema"
-          variant="secondary"
-          size="sm"
-          onPress={() => router.push(`/lists/${listId}/schema` as Href)}
-        />
-        <Button
-          title="Agregar item"
-          size="sm"
-          onPress={() => router.push(`/lists/${listId}/items/new` as Href)}
-        />
-      </View>
+    <ScrollView
+      style={{ flex: 1, width: '100%' }}
+      contentContainerStyle={{ flexGrow: 1, width: '100%' }}
+    >
+      <PageShell>
+        <GradientCard>
+          <Text variant="overline" color={theme.colors.textInverse} style={{ opacity: 0.8 }}>
+            Ranking
+          </Text>
+          <View style={{ height: theme.spacing[2] }} />
+          <Text variant="title" color={theme.colors.textInverse}>
+            {bundle.list.name}
+          </Text>
+          <View style={{ height: theme.spacing[3] }} />
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+            <View>
+              <Text variant="caption" color={theme.colors.textInverse} style={{ opacity: 0.8 }}>
+                Items
+              </Text>
+              <Text variant="display" color={theme.colors.textInverse}>
+                {view.visibleCount}
+              </Text>
+            </View>
+            {leader ? (
+              <View style={{ alignItems: 'flex-end', maxWidth: '55%' }}>
+                <Text variant="caption" color={theme.colors.textInverse} style={{ opacity: 0.8 }}>
+                  Líder · {leader.name}
+                </Text>
+                <Text variant="display" color={theme.colors.textInverse}>
+                  {leader.total.toFixed(1)}%
+                </Text>
+              </View>
+            ) : null}
+          </View>
+        </GradientCard>
 
-      <RankingTable
-        bundle={bundle}
-        rows={view.rows}
-        showPartials={view.showPartials}
-        onEditItem={(id) => router.push(`/lists/${listId}/items/${id}` as Href)}
-      />
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing[2] }}>
+          <Button
+            title="Esquema"
+            variant="secondary"
+            size="sm"
+            pill
+            onPress={() => router.push(`/lists/${listId}/schema` as Href)}
+          />
+          <Button
+            title="Agregar item"
+            size="sm"
+            pill
+            onPress={() => router.push(`/lists/${listId}/items/new` as Href)}
+          />
+        </View>
+
+        <RankingTable
+          bundle={bundle}
+          rows={view.rows}
+          showPartials={view.showPartials}
+          onEditItem={(id) => router.push(`/lists/${listId}/items/${id}` as Href)}
+        />
+      </PageShell>
 
       <ViewControlsModal
         visible={controlsVisible}

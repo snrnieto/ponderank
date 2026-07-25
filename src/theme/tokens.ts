@@ -7,40 +7,54 @@
 export const tokens = {
   colors: {
     light: {
-      text: '#111827',
+      text: '#0F0E17',
       textSecondary: '#6B7280',
       textInverse: '#FFFFFF',
-      background: '#F8FAFC',
+      background: '#F4F4FB',
       surface: '#FFFFFF',
-      surfaceMuted: '#F1F5F9',
-      border: '#E2E8F0',
-      primary: '#0F766E',
-      primaryPressed: '#0D9488',
-      primaryMuted: '#CCFBF1',
-      danger: '#DC2626',
-      success: '#16A34A',
-      warning: '#D97706',
+      surfaceMuted: '#EEF0F8',
+      border: '#E4E6F0',
+      primary: '#6C5CE7',
+      primaryPressed: '#5A4BD4',
+      primaryMuted: '#EDEBFD',
+      secondary: '#2F6BFF',
+      secondaryMuted: '#E8F0FF',
+      danger: '#EF4444',
+      dangerSoft: '#FEE2E2',
+      success: '#10B981',
+      successSoft: '#D1FAE5',
+      warning: '#F59E0B',
+      warningSoft: '#FEF3C7',
+      info: '#3B82F6',
+      infoSoft: '#DBEAFE',
       /** @deprecated starter alias → surfaceMuted */
-      backgroundElement: '#F1F5F9',
+      backgroundElement: '#EEF0F8',
       /** @deprecated starter alias → surfaceMuted */
-      backgroundSelected: '#E2E8F0',
+      backgroundSelected: '#E4E6F0',
     },
     dark: {
       text: '#F8FAFC',
       textSecondary: '#94A3B8',
-      textInverse: '#0F172A',
-      background: '#0F172A',
-      surface: '#1E293B',
-      surfaceMuted: '#334155',
-      border: '#475569',
-      primary: '#2DD4BF',
-      primaryPressed: '#5EEAD4',
-      primaryMuted: '#134E4A',
+      textInverse: '#FFFFFF',
+      background: '#0B0B14',
+      surface: '#161622',
+      surfaceMuted: '#222233',
+      border: '#2E2E44',
+      primary: '#A78BFA',
+      primaryPressed: '#C4B5FD',
+      primaryMuted: '#2E2458',
+      secondary: '#60A5FA',
+      secondaryMuted: '#1E3A5F',
       danger: '#F87171',
-      success: '#4ADE80',
+      dangerSoft: '#3F1D1D',
+      success: '#34D399',
+      successSoft: '#14352B',
       warning: '#FBBF24',
-      backgroundElement: '#334155',
-      backgroundSelected: '#475569',
+      warningSoft: '#3F2E10',
+      info: '#60A5FA',
+      infoSoft: '#1E3A5F',
+      backgroundElement: '#222233',
+      backgroundSelected: '#2E2E44',
     },
   },
   typography: {
@@ -55,6 +69,7 @@ export const tokens = {
       lg: 18,
       xl: 22,
       title: 28,
+      display: 34,
     },
     weights: {
       regular: '400' as const,
@@ -80,14 +95,42 @@ export const tokens = {
     8: 64,
   },
   radius: {
-    sm: 6,
-    md: 10,
-    lg: 16,
+    sm: 8,
+    md: 14,
+    lg: 20,
+    xl: 28,
     full: 9999,
   },
+  elevation: {
+    sm: {
+      shadowColor: '#6C5CE7',
+      shadowOpacity: 0.08,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 3,
+    },
+    md: {
+      shadowColor: '#6C5CE7',
+      shadowOpacity: 0.12,
+      shadowRadius: 20,
+      shadowOffset: { width: 0, height: 8 },
+      elevation: 6,
+    },
+    lg: {
+      shadowColor: '#6C5CE7',
+      shadowOpacity: 0.18,
+      shadowRadius: 28,
+      shadowOffset: { width: 0, height: 12 },
+      elevation: 10,
+    },
+  },
+  gradients: {
+    brand: ['#6C5CE7', '#2F6BFF'] as const,
+    brandSoft: ['#A78BFA', '#60A5FA'] as const,
+  },
   components: {
-    buttonHeight: 44,
-    inputHeight: 44,
+    buttonHeight: 48,
+    inputHeight: 48,
     hitSlop: 8,
   },
 } as const;
@@ -95,6 +138,7 @@ export const tokens = {
 export type ColorSchemeName = 'light' | 'dark';
 export type ThemeColors = (typeof tokens.colors)[ColorSchemeName];
 export type ThemeColorKey = keyof ThemeColors;
+export type ElevationLevel = keyof typeof tokens.elevation;
 
 export function getTheme(scheme: ColorSchemeName) {
   return {
@@ -103,6 +147,8 @@ export function getTheme(scheme: ColorSchemeName) {
     typography: tokens.typography,
     spacing: tokens.spacing,
     radius: tokens.radius,
+    elevation: tokens.elevation,
+    gradients: tokens.gradients,
     components: tokens.components,
   };
 }
@@ -126,6 +172,5 @@ export const Fonts = {
   serif: 'serif',
   rounded: 'system-ui',
 };
-export const MaxContentWidth = 800;
+export const MaxContentWidth = 1440;
 export const BottomTabInset = 50;
-

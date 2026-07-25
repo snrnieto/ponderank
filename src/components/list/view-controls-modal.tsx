@@ -48,7 +48,7 @@ export function ViewControlsModal({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.backdrop}>
+      <View style={[styles.backdrop, { backgroundColor: 'rgba(15,14,23,0.45)' }]}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Cerrar opciones de vista"
@@ -57,12 +57,12 @@ export function ViewControlsModal({
         />
         <Surface
           padded
+          elevation="lg"
           style={[
             styles.panel,
             {
               margin: theme.spacing[4],
               gap: theme.spacing[4],
-              backgroundColor: theme.colors.surface,
             },
           ]}
         >
@@ -72,7 +72,10 @@ export function ViewControlsModal({
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.titleRow}>
-              <Text variant="subtitle">Opciones de la tabla</Text>
+              <View style={{ gap: theme.spacing[1] }}>
+                <Text variant="overline">Vista</Text>
+                <Text variant="subtitle">Opciones de la tabla</Text>
+              </View>
               <Button title="Cerrar" size="sm" variant="ghost" onPress={onClose} />
             </View>
 
@@ -89,11 +92,12 @@ export function ViewControlsModal({
 
             {categoryColumn ? (
               <View style={{ gap: theme.spacing[2] }}>
-                <Text variant="label">Filtro: {categoryColumn.name}</Text>
+                <Text variant="overline">Filtro: {categoryColumn.name}</Text>
                 <View style={[styles.wrap, { gap: theme.spacing[2] }]}>
                   <Button
                     title="Todos"
                     size="sm"
+                    pill
                     variant={!filter.categoryValue ? 'primary' : 'secondary'}
                     onPress={onClearFilter}
                   />
@@ -102,6 +106,7 @@ export function ViewControlsModal({
                       key={option}
                       title={option}
                       size="sm"
+                      pill
                       variant={filter.categoryValue === option ? 'primary' : 'secondary'}
                       onPress={() =>
                         onFilter({
@@ -130,7 +135,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.45)',
   },
   panel: {
     width: '90%',

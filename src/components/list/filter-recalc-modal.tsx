@@ -17,15 +17,16 @@ export function FilterRecalcModal({ visible, onRecalculate, onKeep, onCancel }: 
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
-      <View style={[styles.backdrop, { backgroundColor: 'rgba(0,0,0,0.45)' }]}>
-        <Surface padded style={{ margin: theme.spacing[5], gap: theme.spacing[3] }}>
+      <View style={[styles.backdrop, { backgroundColor: 'rgba(15,14,23,0.45)' }]}>
+        <Surface padded elevation="lg" style={{ margin: theme.spacing[5], gap: theme.spacing[3] }}>
+          <Text variant="overline">Filtro</Text>
           <Text variant="subtitle">¿Recalcular ranking?</Text>
           <Text colorKey="textSecondary">
             Al filtrar puedes recalcular objetivos dinámicos (mín/máx/promedio) solo con los items
             visibles, o mantener los valores calculados sobre toda la lista.
           </Text>
-          <Button title="Recalcular con visibles" onPress={onRecalculate} />
-          <Button title="Mantener valores de toda la lista" variant="secondary" onPress={onKeep} />
+          <Button title="Recalcular con visibles" pill onPress={onRecalculate} />
+          <Button title="Mantener valores de toda la lista" variant="secondary" pill onPress={onKeep} />
           <Button title="Cancelar" variant="ghost" onPress={onCancel} />
         </Surface>
       </View>

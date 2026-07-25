@@ -217,7 +217,8 @@ export default function SchemaScreen() {
       >
         <WeightSummary sum={weightCheck.sum} remaining={weightCheck.remaining} ok={weightCheck.ok} />
 
-        <Surface padded style={{ gap: theme.spacing[2] }}>
+        <Surface padded elevation="sm" style={{ gap: theme.spacing[2] }}>
+          <Text variant="overline">Variables</Text>
           <Text variant="subtitle">Variables globales</Text>
           {globals.map((g, index) => (
             <View key={g.id} style={{ gap: theme.spacing[1] }}>
@@ -240,10 +241,11 @@ export default function SchemaScreen() {
               />
             </View>
           ))}
-          <Button title="Agregar variable" variant="secondary" onPress={addGlobal} />
+          <Button title="Agregar variable" variant="secondary" pill onPress={addGlobal} />
         </Surface>
 
-        <Surface padded style={{ gap: theme.spacing[3] }}>
+        <Surface padded elevation="sm" style={{ gap: theme.spacing[3] }}>
+          <Text variant="overline">Esquema</Text>
           <Text variant="subtitle">Columnas</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing[2] }}>
             {(['text', 'number', 'image', 'category', 'calculated', 'criterion'] as const).map(
@@ -252,6 +254,7 @@ export default function SchemaScreen() {
                   key={kind}
                   title={`+ ${kind}`}
                   size="sm"
+                  pill
                   variant="secondary"
                   onPress={() => addColumn(kind)}
                 />
@@ -266,6 +269,7 @@ export default function SchemaScreen() {
                 key={column.id}
                 tone="muted"
                 padded
+                elevation="none"
                 style={{
                   gap: theme.spacing[2],
                   borderWidth: focused ? 2 : StyleSheet.hairlineWidth,
@@ -335,6 +339,7 @@ export default function SchemaScreen() {
                   title="Eliminar columna"
                   variant="danger"
                   size="sm"
+                  pill
                   onPress={() => removeColumn(column.id)}
                 />
               </Surface>
@@ -403,6 +408,7 @@ export default function SchemaScreen() {
       >
         <Button
           title="Guardar esquema"
+          pill
           onPress={() => void onSave()}
           disabled={!weightCheck.ok && columns.some((c) => c.rank)}
         />
@@ -486,6 +492,7 @@ function CalcEditor({
             key={op.op}
             title={op.label}
             size="sm"
+            pill
             variant={calc.op === op.op ? 'primary' : 'secondary'}
             onPress={() => changeOp(op.op)}
           />
@@ -552,6 +559,7 @@ function RankEditor({
             key={direction}
             title={direction === 'lowerBetter' ? 'Menor mejor' : 'Mayor mejor'}
             size="sm"
+            pill
             variant={rank.direction === direction ? 'primary' : 'secondary'}
             onPress={() => onChange({ ...column, rank: { ...rank, direction } })}
           />
@@ -563,6 +571,7 @@ function RankEditor({
             key={mode}
             title={mode}
             size="sm"
+            pill
             variant={rank.target.mode === mode ? 'primary' : 'secondary'}
             onPress={() =>
               onChange({

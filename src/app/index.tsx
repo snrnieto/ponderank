@@ -1,8 +1,11 @@
+import { SymbolView } from 'expo-symbols';
 import { useRouter, type Href } from 'expo-router';
 import { useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, View } from 'react-native';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { PageShell } from '@/components/ui/page-shell';
 import { Surface } from '@/components/ui/surface';
 import { Text } from '@/components/ui/text';
 import { TextInput } from '@/components/ui/text-input';
@@ -37,9 +40,11 @@ export default function ListsIndexScreen() {
   }
 
   return (
-    <View style={[styles.container, { padding: theme.spacing[4], gap: theme.spacing[4] }]}>
-      <Surface padded>
-        <Text variant="subtitle">Nueva lista</Text>
+    <PageShell maxWidth={720} style={{ gap: theme.spacing[5] }}>
+      <Surface padded elevation="md">
+        <Text variant="overline">Nueva lista</Text>
+        <View style={{ height: theme.spacing[2] }} />
+        <Text variant="subtitle">Crear comparación</Text>
         <View style={{ height: theme.spacing[3] }} />
         <TextInput
           value={name}
@@ -48,40 +53,68 @@ export default function ListsIndexScreen() {
           onSubmitEditing={() => void onCreate()}
         />
         <View style={{ height: theme.spacing[3] }} />
-        <Button title="Crear" onPress={() => void onCreate()} />
+        <Button title="Crear lista" pill onPress={() => void onCreate()} />
       </Surface>
 
-      {loading ? (
-        <Text colorKey="textSecondary">Cargando…</Text>
-      ) : (
-        <FlatList
-          data={bundles}
-          keyExtractor={(item) => item.list.id}
-          contentContainerStyle={{ gap: theme.spacing[3] }}
-          ListEmptyComponent={<Text colorKey="textSecondary">No hay listas todavía.</Text>}
-          renderItem={({ item }) => (
-            <Pressable onPress={() => router.push(`/lists/${item.list.id}` as Href)}>
-              <Surface padded>
-                <Text variant="label">{item.list.name}</Text>
-                <Text colorKey="textSecondary" variant="caption">
-                  {item.items.length} items · {item.columns.length} columnas
-                </Text>
-                <View style={{ height: theme.spacing[2] }} />
-                <Button
-                  title="Eliminar"
-                  variant="danger"
-                  size="sm"
-                  onPress={() => onDelete(item.list.id, item.list.name)}
-                />
+      <View style={{ gap: theme.spacing[3], flex: 1 }}>
+        <Text variant="overline">Tus listas</Text>
+        {loading ? (
+          <Text colorKey="textSecondary">Cargando…</Text>
+        ) : (
+          <FlatList
+            data={bundles}
+            keyExtractor={(item) => item.list.id}
+            contentContainerStyle={{ gap: theme.spacing[3], paddingBottom: theme.spacing[6] }}
+            ListEmptyComponent={
+              <Surface padded elevation="sm">
+                <Text colorKey="textSecondary">No hay listas todavía.</Text>
               </Surface>
-            </Pressable>
-          )}
-        />
-      )}
-    </View>
+            }
+            renderItem={({ item }) => (
+              <Surface padded elevation="sm">
+                <View style={styles.row}>
+                  <Pressable
+                    style={{ flex: 1, gap: theme.spacing[1] }}
+                    onPress={() => router.push(`/lists/${item.list.id}` as Href)}
+                  >
+                    <Text variant="label">{item.list.name}</Text>
+                    <View style={{ flexDirection: 'row', gap: theme.spacing[2], flexWrap: 'wrap' }}>
+                      <Badge label={`${item.items.length} items`} tone="primary" />
+                      <Badge label={`${item.columns.length} columnas`} tone="info" />
+                    </View>
+                  </Pressable>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`Eliminar ${item.list.name}`}
+                    hitSlop={theme.components.hitSlop}
+                    onPress={() => onDelete(item.list.id, item.list.name)}
+                    style={[
+                      styles.iconBtn,
+                      { backgroundColor: theme.colors.dangerSoft, borderRadius: theme.radius.md },
+                    ]}
+                  >
+                    <SymbolView
+                      name={{ ios: 'trash', android: 'delete', web: 'delete' }}
+                      size={18}
+                      tintColor={theme.colors.danger}
+                    />
+                  </Pressable>
+                </View>
+              </Surface>
+            )}
+          />
+        )}
+      </View>
+    </PageShell>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  iconBtn: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

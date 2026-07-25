@@ -39,7 +39,7 @@ export function SortControls({
 
   return (
     <View style={{ gap: theme.spacing[2] }}>
-      <Text variant="label">Ordenar por</Text>
+      <Text variant="overline">Ordenar por</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View style={{ flexDirection: 'row', gap: theme.spacing[2] }}>
           {options.map((opt) => (
@@ -47,6 +47,7 @@ export function SortControls({
               key={opt.key}
               title={opt.label}
               size="sm"
+              pill
               variant={sortKey === opt.key ? 'primary' : 'secondary'}
               onPress={() => onSortKey(opt.key)}
             />

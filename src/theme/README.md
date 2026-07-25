@@ -1,16 +1,17 @@
 # Design system
 
-All visual tokens live in **`tokens.ts`**. Change a value there and every primitive (`Button`, `Text`, `TextInput`, `Surface`) picks it up.
+All visual tokens live in **`tokens.ts`**. Change a value there and every primitive (`Button`, `Text`, `TextInput`, `Surface`, `Badge`, `GradientCard`) picks it up.
 
 ## Common edits
 
 | Want to change… | Edit |
 |-----------------|------|
-| Primary button color | `tokens.colors.light.primary` and `.dark.primary` |
-| Body text color | `tokens.colors.*.text` |
-| Spacing scale | `tokens.spacing` |
+| Primary / brand accent | `tokens.colors.*.primary` (+ `gradients.brand`) |
+| Secondary accent | `tokens.colors.*.secondary` |
+| Soft badge backgrounds | `tokens.colors.*.successSoft` / `dangerSoft` / etc. |
+| Card shadows | `tokens.elevation.sm\|md\|lg` |
 | Corner radius | `tokens.radius` |
-| Font sizes | `tokens.typography.sizes` |
+| Font sizes | `tokens.typography.sizes` (includes `display`) |
 
 ## Rules
 

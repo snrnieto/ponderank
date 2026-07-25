@@ -13,11 +13,12 @@ export function PartialsToggle({ value, onChange }: Props) {
   const theme = useTheme();
   return (
     <View style={{ gap: theme.spacing[2] }}>
-      <Text variant="label">% parciales por criterio</Text>
+      <Text variant="overline">% parciales por criterio</Text>
       <Button
         title={value ? 'Ocultar parciales' : 'Mostrar parciales'}
         variant="secondary"
         size="sm"
+        pill
         onPress={() => onChange(!value)}
       />
     </View>

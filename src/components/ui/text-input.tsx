@@ -17,10 +17,10 @@ export function TextInput({ style, ...rest }: AppTextInputProps) {
         {
           height: theme.components.inputHeight,
           borderRadius: theme.radius.md,
-          borderColor: theme.colors.border,
-          backgroundColor: theme.colors.surface,
+          borderWidth: 0,
+          backgroundColor: theme.colors.surfaceMuted,
           color: theme.colors.text,
-          paddingHorizontal: theme.spacing[3],
+          paddingHorizontal: theme.spacing[4],
           fontSize: theme.typography.sizes.md,
           fontFamily: theme.typography.fontFamily.sans,
         },
@@ -32,7 +32,5 @@ export function TextInput({ style, ...rest }: AppTextInputProps) {
 }
 
 const styles = StyleSheet.create({
-  base: {
-    borderWidth: StyleSheet.hairlineWidth,
-  },
+  base: {},
 });

@@ -38,7 +38,13 @@ export function ImageFieldInput({ value, onChange }: Props) {
         autoCorrect={false}
       />
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing[2] }}>
-        <Button title="Adjuntar imagen" size="sm" variant="secondary" onPress={() => void pickLocal()} />
+        <Button
+          title="Adjuntar imagen"
+          size="sm"
+          pill
+          variant="secondary"
+          onPress={() => void pickLocal()}
+        />
         <Button title="Limpiar" size="sm" variant="ghost" onPress={() => onChange('')} />
       </View>
       {Platform.OS === 'web' ? null : null}

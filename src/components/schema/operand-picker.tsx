@@ -35,6 +35,7 @@ export function OperandPicker({ label, value, options, emptyMessage, onChange }:
               key={option.ref}
               title={option.label}
               size="sm"
+              pill
               variant={value === option.ref ? 'primary' : 'secondary'}
               onPress={() => onChange(option.ref)}
             />

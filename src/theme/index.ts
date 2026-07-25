@@ -10,4 +10,5 @@ export {
   type ColorSchemeName,
   type ThemeColors,
   type ThemeColorKey,
+  type ElevationLevel,
 } from './tokens';

@@ -19,9 +19,13 @@ function RootNavigator() {
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: theme.colors.surface },
+        headerStyle: { backgroundColor: theme.colors.background },
+        headerShadowVisible: false,
         headerTintColor: theme.colors.primary,
-        headerTitleStyle: { color: theme.colors.text },
+        headerTitleStyle: {
+          color: theme.colors.text,
+          fontWeight: theme.typography.weights.semibold,
+        },
         contentStyle: { backgroundColor: theme.colors.background },
       }}
     >

@@ -4,6 +4,7 @@ import { Alert, ScrollView, View } from 'react-native';
 
 import { ImageFieldInput } from '@/components/list/image-field-input';
 import { Button } from '@/components/ui/button';
+import { Surface } from '@/components/ui/surface';
 import { Text } from '@/components/ui/text';
 import { TextInput } from '@/components/ui/text-input';
 import type { FieldValue, Item } from '@/domain';
@@ -70,53 +71,57 @@ export function ItemForm({ mode }: { mode: 'new' | 'edit' }) {
   }
 
   return (
-    <ScrollView contentContainerStyle={{ padding: theme.spacing[4], gap: theme.spacing[3] }}>
-      {editableColumns.map((column) => {
-        const value = item.values[column.id];
-        return (
-          <View key={column.id} style={{ gap: theme.spacing[1] }}>
-            <Text variant="label">{column.name}</Text>
-            {column.kind === 'image' ? (
-              <ImageFieldInput
-                value={typeof value === 'string' ? value : ''}
-                onChange={(uri) => setValue(column.id, uri)}
-              />
-            ) : column.kind === 'category' ? (
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing[2] }}>
-                {(column.options ?? []).map((option) => (
-                  <Button
-                    key={option}
-                    title={option}
-                    size="sm"
-                    variant={value === option ? 'primary' : 'secondary'}
-                    onPress={() => setValue(column.id, option)}
-                  />
-                ))}
-              </View>
-            ) : (
-              <TextInput
-                value={value == null ? '' : String(value)}
-                keyboardType={column.kind === 'number' ? 'decimal-pad' : 'default'}
-                onChangeText={(text) => {
-                  if (column.kind === 'number') {
-                    if (text.trim() === '') {
-                      setValue(column.id, null);
-                      return;
+    <ScrollView contentContainerStyle={{ padding: theme.spacing[4], gap: theme.spacing[4] }}>
+      <Surface padded elevation="sm" style={{ gap: theme.spacing[4] }}>
+        <Text variant="overline">{mode === 'new' ? 'Nuevo item' : 'Editar item'}</Text>
+        {editableColumns.map((column) => {
+          const value = item.values[column.id];
+          return (
+            <View key={column.id} style={{ gap: theme.spacing[2] }}>
+              <Text variant="label">{column.name}</Text>
+              {column.kind === 'image' ? (
+                <ImageFieldInput
+                  value={typeof value === 'string' ? value : ''}
+                  onChange={(uri) => setValue(column.id, uri)}
+                />
+              ) : column.kind === 'category' ? (
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing[2] }}>
+                  {(column.options ?? []).map((option) => (
+                    <Button
+                      key={option}
+                      title={option}
+                      size="sm"
+                      pill
+                      variant={value === option ? 'primary' : 'secondary'}
+                      onPress={() => setValue(column.id, option)}
+                    />
+                  ))}
+                </View>
+              ) : (
+                <TextInput
+                  value={value == null ? '' : String(value)}
+                  keyboardType={column.kind === 'number' ? 'decimal-pad' : 'default'}
+                  onChangeText={(text) => {
+                    if (column.kind === 'number') {
+                      if (text.trim() === '') {
+                        setValue(column.id, null);
+                        return;
+                      }
+                      const num = Number(text);
+                      setValue(column.id, Number.isFinite(num) ? num : null);
+                    } else {
+                      setValue(column.id, text);
                     }
-                    const num = Number(text);
-                    setValue(column.id, Number.isFinite(num) ? num : null);
-                  } else {
-                    setValue(column.id, text);
-                  }
-                }}
-              />
-            )}
-          </View>
-        );
-      })}
+                  }}
+                />
+              )}
+            </View>
+          );
+        })}
+      </Surface>
 
-      <Button title="Guardar" onPress={() => void onSave()} />
-      {mode === 'edit' ? <Button title="Eliminar" variant="danger" onPress={onDelete} /> : null}
+      <Button title="Guardar" pill onPress={() => void onSave()} />
+      {mode === 'edit' ? <Button title="Eliminar" variant="danger" pill onPress={onDelete} /> : null}
       <Button title="Cancelar" variant="ghost" onPress={() => safeGoBack(listHref)} />
     </ScrollView>
   );

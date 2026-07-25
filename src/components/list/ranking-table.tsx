@@ -1,6 +1,9 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { Image } from 'expo-image';
+import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
+import { Badge } from '@/components/ui/badge';
 import { Surface } from '@/components/ui/surface';
 import { Text } from '@/components/ui/text';
 import type { ComparisonListBundle } from '@/domain';
@@ -31,103 +34,159 @@ function formatValue(value: string | number | null | undefined): string {
   return value;
 }
 
+function scoreTone(total: number): 'success' | 'warning' | 'danger' | 'primary' {
+  if (total >= 80) return 'success';
+  if (total >= 60) return 'primary';
+  if (total >= 40) return 'warning';
+  return 'danger';
+}
+
 export function RankingTable({ bundle, rows, showPartials, onEditItem }: Props) {
   const theme = useTheme();
+  const [containerWidth, setContainerWidth] = useState(0);
   const imageCol = bundle.columns.find((c) => c.kind === 'image');
   const criteria = bundle.columns.filter((c) => c.rank);
   const visibleCols = bundle.columns.filter(
     (c) => c.kind !== 'image' && (showPartials || !c.rank || c.kind === 'criterion'),
   );
+  const dataCols = visibleCols.filter((c) => c.kind !== 'text').slice(0, 6);
+  const partialCols = showPartials ? criteria : [];
+
+  const fixedMin =
+    40 +
+    (imageCol ? 52 : 0) +
+    160 +
+    110 +
+    partialCols.length * 110 +
+    dataCols.length * 110 +
+    theme.spacing[2] * (4 + partialCols.length + dataCols.length);
+
+  const tableWidth = Math.max(fixedMin, containerWidth);
 
   return (
-    <ScrollView horizontal>
-      <View style={{ gap: theme.spacing[2], minWidth: 720 }}>
-        <View style={[styles.headerRow, { gap: theme.spacing[2] }]}>
-          <Text variant="label" style={styles.rankCol}>
-            #
-          </Text>
-          {imageCol ? <Text variant="label" style={styles.imgCol}>Img</Text> : null}
-          <Text variant="label" style={styles.nameCol}>
-            Nombre
-          </Text>
-          <Text variant="label" style={styles.numCol}>
-            Ranking
-          </Text>
-          {showPartials
-            ? criteria.map((c) => (
-                <Text key={c.id} variant="label" style={styles.numCol}>
-                  % {c.name}
-                </Text>
-              ))
-            : null}
-          {visibleCols
-            .filter((c) => c.kind !== 'text')
-            .slice(0, 6)
-            .map((c) => (
-              <Text key={c.id} variant="label" style={styles.numCol}>
+    <View
+      style={{ gap: theme.spacing[3], width: '100%', alignSelf: 'stretch' }}
+      onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
+    >
+      <Text variant="overline">Resultados</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ width: '100%' }}>
+        <View style={{ gap: theme.spacing[3], width: tableWidth || fixedMin, paddingBottom: theme.spacing[2] }}>
+          <View style={[styles.headerRow, { gap: theme.spacing[2], paddingHorizontal: theme.spacing[3] }]}>
+            <Text variant="overline" style={styles.rankCol}>
+              #
+            </Text>
+            {imageCol ? (
+              <Text variant="overline" style={styles.imgCol}>
+                Img
+              </Text>
+            ) : null}
+            <Text variant="overline" style={styles.nameFlex}>
+              Nombre
+            </Text>
+            <Text variant="overline" style={styles.numCol}>
+              Ranking
+            </Text>
+            {partialCols.map((c) => (
+              <Text key={c.id} variant="overline" style={styles.numCol}>
+                % {c.name}
+              </Text>
+            ))}
+            {dataCols.map((c) => (
+              <Text key={c.id} variant="overline" style={styles.numCol}>
                 {c.name}
               </Text>
             ))}
-        </View>
+          </View>
 
-        {rows.map((row, index) => {
-          const img =
-            imageCol && typeof row.resolvedValues[imageCol.id] === 'string'
-              ? (row.resolvedValues[imageCol.id] as string)
-              : null;
-          return (
-            <Pressable key={row.itemId} onPress={() => onEditItem(row.itemId)}>
-              <Surface
-                padded
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: theme.spacing[2],
-                }}
-              >
-                <Text style={styles.rankCol}>{index + 1}</Text>
-                {imageCol ? (
-                  <View style={styles.imgCol}>
-                    {img ? (
-                      <Image source={{ uri: img }} style={styles.thumb} contentFit="cover" />
-                    ) : (
-                      <Text variant="caption">—</Text>
-                    )}
-                  </View>
-                ) : null}
-                <Text style={styles.nameCol} numberOfLines={2}>
-                  {row.name}
-                </Text>
-                <Text style={styles.numCol}>{row.total.toFixed(1)}%</Text>
-                {showPartials
-                  ? criteria.map((c) => (
-                      <Text key={c.id} style={styles.numCol}>
-                        {(row.partials[c.id] ?? 0).toFixed(1)}%
+          {rows.map((row, index) => {
+            const img =
+              imageCol && typeof row.resolvedValues[imageCol.id] === 'string'
+                ? (row.resolvedValues[imageCol.id] as string)
+                : null;
+            const isTop = index < 3;
+
+            return (
+              <Pressable key={row.itemId} onPress={() => onEditItem(row.itemId)}>
+                <Surface
+                  padded
+                  elevation="sm"
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: theme.spacing[2],
+                    width: '100%',
+                  }}
+                >
+                  {isTop ? (
+                    <LinearGradient
+                      colors={[...theme.gradients.brand]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.rankBadge}
+                    >
+                      <Text variant="label" color={theme.colors.textInverse}>
+                        {index + 1}
                       </Text>
-                    ))
-                  : null}
-                {visibleCols
-                  .filter((c) => c.kind !== 'text')
-                  .slice(0, 6)
-                  .map((c) => (
-                    <Text key={c.id} style={styles.numCol} numberOfLines={1}>
+                    </LinearGradient>
+                  ) : (
+                    <View style={[styles.rankBadge, { backgroundColor: theme.colors.surfaceMuted }]}>
+                      <Text variant="label" colorKey="textSecondary">
+                        {index + 1}
+                      </Text>
+                    </View>
+                  )}
+                  {imageCol ? (
+                    <View style={styles.imgCol}>
+                      {img ? (
+                        <Image
+                          source={{ uri: img }}
+                          style={[styles.thumb, { borderRadius: theme.radius.md }]}
+                          contentFit="cover"
+                        />
+                      ) : (
+                        <Text variant="caption">—</Text>
+                      )}
+                    </View>
+                  ) : null}
+                  <Text style={styles.nameFlex} numberOfLines={2} variant="label">
+                    {row.name}
+                  </Text>
+                  <View style={styles.numCol}>
+                    <Badge label={`${row.total.toFixed(1)}%`} tone={scoreTone(row.total)} />
+                  </View>
+                  {partialCols.map((c) => (
+                    <Text key={c.id} style={styles.numCol} variant="caption">
+                      {(row.partials[c.id] ?? 0).toFixed(1)}%
+                    </Text>
+                  ))}
+                  {dataCols.map((c) => (
+                    <Text key={c.id} style={styles.numCol} numberOfLines={1} variant="caption">
                       {formatValue(row.resolvedValues[c.id])}
                     </Text>
                   ))}
-              </Surface>
-            </Pressable>
-          );
-        })}
-      </View>
-    </ScrollView>
+                </Surface>
+              </Pressable>
+            );
+          })}
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  headerRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12 },
-  rankCol: { width: 36 },
-  imgCol: { width: 48 },
-  nameCol: { width: 180 },
-  numCol: { width: 110 },
-  thumb: { width: 40, height: 40, borderRadius: 8 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', width: '100%' },
+  rankCol: { width: 40, flexShrink: 0 },
+  imgCol: { width: 52, flexShrink: 0 },
+  nameFlex: { flex: 1, minWidth: 160 },
+  numCol: { width: 110, flexShrink: 0 },
+  thumb: { width: 44, height: 44 },
+  rankBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
 });
