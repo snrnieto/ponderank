@@ -26,7 +26,6 @@ export function SortControls({
   const theme = useTheme();
   const options: { key: SortKey; label: string }[] = [
     { key: 'ranking', label: 'Ranking' },
-    { key: 'name', label: 'Nombre' },
     ...bundle.columns
       .filter((c) => c.kind !== 'image')
       .map((c) => ({ key: `column:${c.id}` as SortKey, label: c.name })),

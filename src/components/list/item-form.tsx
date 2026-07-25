@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, type Href } from 'expo-router';
 import { useState } from 'react';
 import { Alert, ScrollView, View } from 'react-native';
 
@@ -8,6 +8,7 @@ import { Text } from '@/components/ui/text';
 import { TextInput } from '@/components/ui/text-input';
 import type { FieldValue, Item } from '@/domain';
 import { useTheme } from '@/hooks/use-theme';
+import { safeGoBack } from '@/navigation/safe-go-back';
 import { useLists } from '@/state/lists-context';
 
 export function ItemForm({ mode }: { mode: 'new' | 'edit' }) {
@@ -15,7 +16,7 @@ export function ItemForm({ mode }: { mode: 'new' | 'edit' }) {
   const { getBundle, saveItem, removeItem, newItemDraft } = useLists();
   const bundle = getBundle(listId);
   const theme = useTheme();
-  const router = useRouter();
+  const listHref = `/lists/${listId}` as Href;
 
   const existing = mode === 'edit' ? bundle?.items.find((i) => i.id === itemId) : undefined;
   const [draft, setDraft] = useState<Item | null>(null);
@@ -51,7 +52,7 @@ export function ItemForm({ mode }: { mode: 'new' | 'edit' }) {
 
   async function onSave() {
     await saveItem(listId, draft ?? item);
-    router.back();
+    safeGoBack(listHref);
   }
 
   function onDelete() {
@@ -62,7 +63,7 @@ export function ItemForm({ mode }: { mode: 'new' | 'edit' }) {
         style: 'destructive',
         onPress: async () => {
           await removeItem(listId, item.id);
-          router.back();
+          safeGoBack(listHref);
         },
       },
     ]);
@@ -116,7 +117,7 @@ export function ItemForm({ mode }: { mode: 'new' | 'edit' }) {
 
       <Button title="Guardar" onPress={() => void onSave()} />
       {mode === 'edit' ? <Button title="Eliminar" variant="danger" onPress={onDelete} /> : null}
-      <Button title="Cancelar" variant="ghost" onPress={() => router.back()} />
+      <Button title="Cancelar" variant="ghost" onPress={() => safeGoBack(listHref)} />
     </ScrollView>
   );
 }
