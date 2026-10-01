@@ -1,11 +1,11 @@
 ---
-title: "feat: Item ranking comparator app"
+title: "feat: Ponderank app"
 date: 2026-07-24
 type: feat
-origin: docs/brainstorms/2026-07-24-item-ranking-comparator-requirements.md
+origin: docs/brainstorms/2026-07-24-ponderank-requirements.md
 ---
 
-# feat: Item ranking comparator app
+# feat: Ponderank app
 
 ## Summary
 
@@ -19,7 +19,7 @@ Hoy la comparación vive en hojas de cálculo con fórmulas frágiles (sentido m
 
 ## Requirements
 
-Traceability to origin `docs/brainstorms/2026-07-24-item-ranking-comparator-requirements.md`.
+Traceability to origin `docs/brainstorms/2026-07-24-ponderank-requirements.md`.
 
 - R1–R3. CRUD de listas, items por formulario, variables globales por lista.
 - R4–R8. Columnas texto/número/imagen/categoría; calculadas predefinidas con ejemplos; informativas vs ranking; edición de esquema con items existentes.
@@ -200,7 +200,7 @@ Item { id, listId, values: Record<columnId, string|number|null>, createdAt }
   - Create: `src/data/demo-vehicles-seed.ts` (datos del Excel: globals, columnas, 10 items)
   - Create: `src/data/create-repository.ts` (factory; punto futuro para Supabase)
   - Create: `src/data/async-storage-lists-repository.test.ts` (opcional, smoke con mock storage)
-- **Approach:** Clave `item-ranking:v1`. Si storage vacío y `EXPO_PUBLIC_ENABLE_DEMO_SEED !== 'false'`, hidratar demo. Documentar en README cómo apagar seed. Valores de items del Excel: precio, puestos, consumo km/galón como columna número explícita (no enterrada en fórmula), 0-100, tipo categoría, imagen URL.
+- **Approach:** Clave `ponderank:lists:v1`. Si storage vacío y `EXPO_PUBLIC_ENABLE_DEMO_SEED !== 'false'`, hidratar demo. Documentar en README cómo apagar seed. Valores de items del Excel: precio, puestos, consumo km/galón como columna número explícita (no enterrada en fórmula), 0-100, tipo categoría, imagen URL.
 - **Test scenarios:**
   - Happy: create list → reload from storage → same data.
   - Happy: empty storage + seed flag on → vehicles list present.
@@ -360,7 +360,7 @@ Item { id, listId, values: Record<columnId, string|number|null>, createdAt }
 
 ## Sources & Research
 
-- Origin requirements: `docs/brainstorms/2026-07-24-item-ranking-comparator-requirements.md`
+- Origin requirements: `docs/brainstorms/2026-07-24-ponderank-requirements.md`
 - Hoja de cálculo original (ranking `min(1,target/value)*weight`, globals, derived cols)
 - Expo SQLite/AsyncStorage docs (Context7): SQLite kv-store es alternativa; se descartó para v1 por simplicidad web + dataset pequeño; el camino a Supabase es la interfaz del repositorio, no SQLite
 - Repo actual: Expo Router template en `src/app`, alias `@/*`, sin tests ni persistencia

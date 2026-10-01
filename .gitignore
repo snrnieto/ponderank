@@ -47,3 +47,6 @@ example
 .impeccable/review/
 .impeccable/review-app/
 .impeccable/questions/
+
+# Claude Code (configuración personal)
+.claude/settings.local.json

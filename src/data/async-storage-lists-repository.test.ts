@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { createAsyncStorageListsRepository, STORAGE_KEY } from './async-storage-lists-repository';
+import { createAsyncStorageListsRepository, LEGACY_STORAGE_KEY, STORAGE_KEY } from './async-storage-lists-repository';
 
 function memoryStorage() {
   const map = new Map<string, string>();
@@ -52,6 +52,19 @@ describe('AsyncStorageListsRepository', () => {
     const bundles = await again.loadAll();
     expect(bundles.map((b) => b.list.name)).toContain('Computadores');
     expect(storage.map.has(STORAGE_KEY)).toBe(true);
+  });
+
+  it('migrates lists saved under the legacy key', async () => {
+    process.env.EXPO_PUBLIC_ENABLE_DEMO_SEED = 'false';
+    const storage = memoryStorage();
+    const repo = createAsyncStorageListsRepository(storage);
+    await repo.createList('Viejas');
+    storage.map.set(LEGACY_STORAGE_KEY, storage.map.get(STORAGE_KEY)!);
+    storage.map.delete(STORAGE_KEY);
+
+    const bundles = await createAsyncStorageListsRepository(storage).loadAll();
+    expect(bundles.map((b) => b.list.name)).toEqual(['Viejas']);
+    expect(storage.map.get(STORAGE_KEY)).toBe(storage.map.get(LEGACY_STORAGE_KEY));
   });
 
   it('does not duplicate seed on second load', async () => {

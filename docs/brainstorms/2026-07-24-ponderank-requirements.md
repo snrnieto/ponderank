@@ -1,9 +1,9 @@
 ---
 date: 2026-07-24
-topic: item-ranking-comparator
+topic: ponderank
 ---
 
-# Requirements: Item Ranking Comparator
+# Requirements: Ponderank
 
 ## Summary
 

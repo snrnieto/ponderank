@@ -19,7 +19,7 @@
       "permissions": [
         "android.permission.RECORD_AUDIO"
       ],
-      "package": "com.senira.itemranking"
+      "package": "com.senira.ponderank"
     },
     "web": {
       "output": "static",

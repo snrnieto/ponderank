@@ -7,8 +7,9 @@ import {
   type StoredPayload,
 } from './lists-repository';
 
-// Clave heredada del nombre anterior de la app; no cambiarla o los usuarios pierden sus listas.
-export const STORAGE_KEY = 'item-ranking:v1';
+export const STORAGE_KEY = 'ponderank:lists:v1';
+/** Clave del nombre anterior de la app (item-ranking). Se lee una vez y se copia a `STORAGE_KEY`. */
+export const LEGACY_STORAGE_KEY = 'item-ranking:v1';
 
 export type MemoryStore = {
   getItem(key: string): Promise<string | null>;
@@ -17,7 +18,12 @@ export type MemoryStore = {
 
 export function createAsyncStorageListsRepository(storage: MemoryStore): ListsRepository {
   async function read(): Promise<StoredPayload> {
-    const raw = await storage.getItem(STORAGE_KEY);
+    let raw = await storage.getItem(STORAGE_KEY);
+    if (!raw) {
+      // Migra las listas guardadas con la clave anterior. La clave vieja se conserva como respaldo.
+      raw = await storage.getItem(LEGACY_STORAGE_KEY);
+      if (raw) await storage.setItem(STORAGE_KEY, raw);
+    }
     if (!raw) {
       if (isDemoSeedEnabled()) {
         const seeded: StoredPayload = { version: 1, bundles: [buildDemoVehiclesBundle()] };
