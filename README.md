@@ -88,9 +88,23 @@ pnpm expo run:ios --device --configuration Release
 Web no usa esas flags: no hay APK/IPA. El build de producción genera archivos estáticos:
 
 ```bash
-pnpm expo export --platform web
-pnpm dlx serve dist
+pnpm build:web      # expo export --platform web + dist/404.html
 ```
+
+### Cloudflare (Workers static assets)
+
+La web se despliega como assets estáticos en Cloudflare Workers (`wrangler.jsonc`, sin código de servidor).
+
+```bash
+pnpm preview:web    # build + wrangler dev (runtime real de Cloudflare en local)
+pnpm wrangler login # una vez
+pnpm deploy:web     # build + wrangler deploy
+```
+
+- **Rutas dinámicas**: Expo exporta `list/[listId].html` literal; `public/_redirects` reescribe `/list/<id>/…` a esos archivos. Si agregas una ruta dinámica en `src/app/`, agrégala ahí también.
+- **Variables `EXPO_PUBLIC_*`**: se incrustan en el JS al hacer el build, no se leen en runtime. Deben existir en el entorno donde corre `pnpm build:web` (tu `.env` local o las variables de build de Cloudflare), no como variables del Worker.
+- **Datos**: viven en `localStorage` del navegador y dependen del dominio. Cambiar de dominio (p. ej. de `*.workers.dev` a uno propio) deja a los usuarios sin sus listas.
+- **Despliegue automático (Workers Builds)**: el repo está conectado en Cloudflare; cada push a `main` lo construye y publica Cloudflare. Configuración en *Settings → Build*: build command `pnpm typecheck && pnpm lint && pnpm test && pnpm build:web` (si falla un check no se despliega y producción conserva la versión anterior), deploy command `pnpm wrangler deploy`, y en *Build variables* `PNPM_VERSION=11.17.0` más las `EXPO_PUBLIC_*`. El nombre del Worker debe coincidir con `name` en `wrangler.jsonc` (`ponderank`).
 
 ### Tiendas (App Store / Play Store)
 

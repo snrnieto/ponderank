@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ponderank",
+  "compatibility_date": "2026-10-01",
+  // Solo assets estáticos: no hay Worker con código. El build sale de `pnpm build:web`.
+  "assets": {
+    "directory": "./dist",
+    "html_handling": "drop-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+}

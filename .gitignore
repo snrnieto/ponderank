@@ -50,3 +50,7 @@ example
 
 # Claude Code (configuración personal)
 .claude/settings.local.json
+
+# Cloudflare (wrangler)
+.wrangler/
+.dev.vars*

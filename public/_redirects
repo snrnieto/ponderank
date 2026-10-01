@@ -1,0 +1,8 @@
+# Expo exporta las rutas dinámicas como archivos literales (list/[listId].html).
+# Estas reescrituras (200) sirven ese HTML para cualquier id; la primera que coincide gana.
+# Los corchetes van codificados (%5B %5D): sin codificar, Cloudflare responde 307 a la ruta literal.
+/list/:listId/items/new     /list/%5BlistId%5D/items/new 200
+/list/:listId/items/import  /list/%5BlistId%5D/items/import 200
+/list/:listId/items/:itemId /list/%5BlistId%5D/items/%5BitemId%5D 200
+/list/:listId/schema        /list/%5BlistId%5D/schema 200
+/list/:listId               /list/%5BlistId%5D 200
