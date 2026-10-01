@@ -47,7 +47,7 @@ export function RankingTable({ bundle, rows, showPartials, onEditItem }: Props) 
   const imageCol = bundle.columns.find((c) => c.kind === 'image');
   const criteria = bundle.columns.filter((c) => c.rank);
   const visibleCols = bundle.columns.filter(
-    (c) => c.kind !== 'image' && (showPartials || !c.rank || c.kind === 'criterion'),
+    (c) => c.kind !== 'image' && (showPartials || !c.rank || !c.calc),
   );
   const dataCols = visibleCols.filter((c) => c.kind !== 'text').slice(0, 6);
   const partialCols = showPartials ? criteria : [];

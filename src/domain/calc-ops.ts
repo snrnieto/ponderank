@@ -91,3 +91,21 @@ export function getCalcOpMeta(op: CalcOp): CalcOpMeta {
   }
   return found;
 }
+
+/** Fórmula legible de un cálculo, ej. "Precio ÷ Puestos". */
+export function formatCalcFormula(op: CalcOp, left: string, right: string): string {
+  switch (op) {
+    case 'div':
+    case 'globalDivCol':
+      return `${left} ÷ ${right}`;
+    case 'mul':
+    case 'colMulGlobal':
+      return `${left} × ${right}`;
+    case 'add':
+      return `${left} + ${right}`;
+    case 'sub':
+      return `${left} − ${right}`;
+    case 'pct':
+      return `(${left} ÷ ${right}) × 100`;
+  }
+}

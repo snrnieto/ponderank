@@ -57,6 +57,7 @@ function RootNavigator() {
         <Stack.Screen name="lists/[listId]/index" options={{ title: 'Lista' }} />
         <Stack.Screen name="lists/[listId]/schema" options={{ title: 'Esquema' }} />
         <Stack.Screen name="lists/[listId]/items/new" options={{ title: 'Nuevo item' }} />
+        <Stack.Screen name="lists/[listId]/items/import" options={{ title: 'Agregar masivo' }} />
         <Stack.Screen name="lists/[listId]/items/[itemId]" options={{ title: 'Editar item' }} />
       </Stack>
     </ThemeProvider>

@@ -8,6 +8,8 @@ export type ListsRepository = {
   deleteList(listId: string): Promise<void>;
   createList(name: string): Promise<ComparisonListBundle>;
   upsertItem(listId: string, item: Item): Promise<void>;
+  /** Append several new items in one write (bulk import). */
+  addItems(listId: string, items: Item[]): Promise<void>;
   deleteItem(listId: string, itemId: string): Promise<void>;
   replaceSchema(
     listId: string,

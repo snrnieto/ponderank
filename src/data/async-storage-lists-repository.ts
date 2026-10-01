@@ -85,6 +85,14 @@ export function createAsyncStorageListsRepository(storage: MemoryStore): ListsRe
       });
     },
 
+    async addItems(listId, items) {
+      await touch(listId, (bundle) => {
+        for (const item of items) {
+          bundle.items.push({ ...item, listId, id: item.id || createId('item') });
+        }
+      });
+    },
+
     async deleteItem(listId, itemId) {
       await touch(listId, (bundle) => {
         bundle.items = bundle.items.filter((i) => i.id !== itemId);

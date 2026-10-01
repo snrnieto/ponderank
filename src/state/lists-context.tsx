@@ -2,7 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 
 import { createRepository } from '@/data/create-repository';
 import { createId } from '@/data/lists-repository';
-import type { ComparisonListBundle, Item, ListColumn, ListGlobal } from '@/domain';
+import type { ComparisonListBundle, FieldValue, Item, ListColumn, ListGlobal } from '@/domain';
 import type { ListsRepository } from '@/data/lists-repository';
 
 type ListsContextValue = {
@@ -15,6 +15,7 @@ type ListsContextValue = {
   getBundle: (listId: string) => ComparisonListBundle | undefined;
   saveItem: (listId: string, item: Item) => Promise<void>;
   removeItem: (listId: string, itemId: string) => Promise<void>;
+  importItems: (listId: string, rows: Record<string, FieldValue>[]) => Promise<void>;
   saveSchema: (
     listId: string,
     schema: { globals: ListGlobal[]; columns: ListColumn[] },
@@ -79,6 +80,14 @@ export function ListsProvider({
       },
       removeItem: async (listId, itemId) => {
         await repository.deleteItem(listId, itemId);
+        await refresh();
+      },
+      importItems: async (listId, rows) => {
+        const createdAt = new Date().toISOString();
+        await repository.addItems(
+          listId,
+          rows.map((values) => ({ id: createId('item'), listId, values, createdAt })),
+        );
         await refresh();
       },
       saveSchema: async (listId, schema) => {

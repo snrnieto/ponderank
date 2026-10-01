@@ -9,6 +9,7 @@ import {
   ScrollView,
   StyleSheet,
   View,
+  useWindowDimensions,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from 'react-native';
@@ -16,14 +17,22 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { OperandPicker } from '@/components/schema/operand-picker';
 import { WeightSummary } from '@/components/schema/weight-summary';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Surface } from '@/components/ui/surface';
+import { Grid } from '@/components/ui/grid';
 import { Text } from '@/components/ui/text';
 import { TextInput } from '@/components/ui/text-input';
 import { createId } from '@/data/lists-repository';
 import {
+  buildRankExample,
   CALC_OPS,
   canSaveSchema,
+  formatCalcFormula,
+  COLUMN_KIND_HELP,
+  RANK_DIRECTION_HELP,
+  RECOMMENDED_TARGET,
+  TARGET_MODE_HELP,
   type CalcOp,
   type ListColumn,
   type ListGlobal,
@@ -34,6 +43,12 @@ import {
 import { useTheme } from '@/hooks/use-theme';
 import { safeGoBack } from '@/navigation/safe-go-back';
 import { useLists } from '@/state/lists-context';
+
+/** A partir de este ancho la pantalla usa el layout de escritorio. */
+const WIDE_BREAKPOINT = 900;
+/** A partir de este ancho las columnas se muestran en 3 columnas de grid. */
+const XL_BREAKPOINT = 1280;
+const SCHEMA_MAX_WIDTH = 1400;
 
 const KIND_LABELS: Record<ListColumn['kind'], string> = {
   text: 'texto',
@@ -65,6 +80,9 @@ export default function SchemaScreen() {
   const bundle = getBundle(listId);
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const wide = width >= WIDE_BREAKPOINT;
+  const gridColumns = width >= XL_BREAKPOINT ? 3 : wide ? 2 : 1;
 
   const scrollRef = useRef<ScrollView>(null);
 
@@ -194,8 +212,117 @@ export default function SchemaScreen() {
     setShowScrollTop(event.nativeEvent.contentOffset.y > 240);
   }
 
+  function toggleRank(columnId: string) {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setColumns((prev) =>
+      prev.map((c) =>
+        c.id === columnId
+          ? {
+              ...c,
+              rank: c.rank
+                ? undefined
+                : { weight: 0, direction: 'lowerBetter', target: { mode: 'min' } },
+            }
+          : c,
+      ),
+    );
+  }
+
+  function updateColumn(next: ListColumn) {
+    setColumns((prev) => prev.map((c) => (c.id === next.id ? next : c)));
+  }
+
   const footerPadding = theme.spacing[4] + insets.bottom;
-  const footerApproxHeight = theme.components.buttonHeight * 2 + footerPadding + theme.spacing[3];
+  const footerApproxHeight = wide
+    ? theme.components.buttonHeight + footerPadding + theme.spacing[3]
+    : theme.components.buttonHeight * 2 + footerPadding + theme.spacing[3];
+  const criteria = columns
+    .filter((c) => c.rank)
+    .map((c) => ({ id: c.id, name: c.name, weight: c.rank!.weight }));
+  const rankedColumns = columns.filter((c) => c.rank);
+  const dataColumns = columns.filter((c) => !c.rank);
+
+  function renderColumnCard(column: ListColumn) {
+    const focused = focusedColumnId === column.id;
+    const canToggleRank = column.kind === 'number' || column.kind === 'calculated';
+    return (
+      <View
+        key={column.id}
+        style={{
+          flexGrow: 1,
+          gap: theme.spacing[3],
+          padding: theme.spacing[3],
+          borderRadius: theme.radius.md,
+          backgroundColor: theme.colors.surface,
+          borderWidth: focused ? 2 : StyleSheet.hairlineWidth,
+          borderColor: focused ? theme.colors.primary : theme.colors.border,
+        }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing[2] }}>
+          <TextInput
+            style={{ flex: 1, minWidth: 0 }}
+            value={column.name}
+            onChangeText={(name) => updateColumn({ ...column, name })}
+          />
+          <Button
+            title="Eliminar"
+            size="sm"
+            pill
+            variant="ghost"
+            onPress={() => removeColumn(column.id)}
+          />
+        </View>
+        <View
+          style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: theme.spacing[2] }}
+        >
+          <Badge label={COLUMN_KIND_HELP[column.kind].label} style={{ alignSelf: 'center' }} />
+          {canToggleRank ? (
+            <Button
+              title={column.rank ? 'En el ranking ✓' : 'Usar en el ranking'}
+              size="sm"
+              pill
+              variant={column.rank ? 'primary' : 'secondary'}
+              onPress={() => toggleRank(column.id)}
+            />
+          ) : null}
+        </View>
+
+        {focused ? (
+          <Text variant="caption" colorKey="primary">
+            Nueva columna — personalízala aquí. {COLUMN_KIND_HELP[column.kind].description}
+          </Text>
+        ) : null}
+
+        {column.kind === 'category' ? (
+          <TextInput
+            value={(column.options ?? []).join(', ')}
+            onChangeText={(text) =>
+              updateColumn({
+                ...column,
+                options: text
+                  .split(',')
+                  .map((s) => s.trim())
+                  .filter(Boolean),
+              })
+            }
+            placeholder="Opciones separadas por coma"
+          />
+        ) : null}
+
+        {column.calc ? (
+          <CalcEditor
+            column={column}
+            columns={columns}
+            globals={globals}
+            defaultOpen={focused}
+            onChange={updateColumn}
+          />
+        ) : null}
+
+        {column.rank ? <RankEditor column={column} onChange={updateColumn} /> : null}
+      </View>
+    );
+  }
 
   return (
     <View style={styles.screen}>
@@ -207,140 +334,129 @@ export default function SchemaScreen() {
         contentContainerStyle={{
           padding: theme.spacing[4],
           paddingBottom: theme.spacing[4] + footerApproxHeight,
-          gap: theme.spacing[4],
+          alignItems: 'center',
         }}
       >
-        <WeightSummary sum={weightCheck.sum} remaining={weightCheck.remaining} ok={weightCheck.ok} />
-
-        <Surface padded elevation="sm" style={{ gap: theme.spacing[2] }}>
-          <Text variant="overline">Variables</Text>
-          <Text variant="subtitle">Variables globales</Text>
-          {globals.map((g, index) => (
-            <View key={g.id} style={{ gap: theme.spacing[1] }}>
-              <TextInput
-                value={g.label}
-                onChangeText={(label) =>
-                  setGlobals((prev) => prev.map((x, i) => (i === index ? { ...x, label } : x)))
-                }
-                placeholder="Etiqueta"
+        <View style={{ width: '100%', maxWidth: SCHEMA_MAX_WIDTH, gap: theme.spacing[4] }}>
+          <View
+            style={{
+              flexDirection: wide ? 'row' : 'column',
+              gap: theme.spacing[4],
+            }}
+          >
+            <View style={{ gap: theme.spacing[4], flex: wide ? 3 : undefined }}>
+              <WeightSummary
+                sum={weightCheck.sum}
+                remaining={weightCheck.remaining}
+                ok={weightCheck.ok}
+                criteria={criteria}
               />
-              <TextInput
-                value={String(g.value)}
-                keyboardType="decimal-pad"
-                onChangeText={(text) =>
-                  setGlobals((prev) =>
-                    prev.map((x, i) => (i === index ? { ...x, value: Number(text) || 0 } : x)),
-                  )
-                }
-                placeholder="Valor"
-              />
+              <Surface padded elevation="sm" style={{ gap: theme.spacing[3] }}>
+                <Text variant="overline">Agregar columna</Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing[2] }}>
+                  {(['text', 'number', 'image', 'category', 'calculated', 'criterion'] as const).map(
+                    (kind) => (
+                      <Button
+                        key={kind}
+                        title={`+ ${COLUMN_KIND_HELP[kind].label}`}
+                        size="sm"
+                        pill
+                        variant="secondary"
+                        onPress={() => addColumn(kind)}
+                      />
+                    ),
+                  )}
+                </View>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    columnGap: theme.spacing[4],
+                    rowGap: theme.spacing[1],
+                  }}
+                >
+                  {(['number', 'category', 'calculated', 'text'] as const).map((kind) => (
+                    <Text
+                      key={kind}
+                      variant="caption"
+                      colorKey="textSecondary"
+                      style={{ flexBasis: wide ? '45%' : '100%', flexGrow: 1 }}
+                    >
+                      <Text variant="caption">{COLUMN_KIND_HELP[kind].label}:</Text>{' '}
+                      {COLUMN_KIND_HELP[kind].description}
+                    </Text>
+                  ))}
+                </View>
+              </Surface>
             </View>
-          ))}
-          <Button title="Agregar variable" variant="secondary" pill onPress={addGlobal} />
-        </Surface>
 
-        <Surface padded elevation="sm" style={{ gap: theme.spacing[3] }}>
-          <Text variant="overline">Esquema</Text>
-          <Text variant="subtitle">Columnas</Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing[2] }}>
-            {(['text', 'number', 'image', 'category', 'calculated', 'criterion'] as const).map(
-              (kind) => (
-                <Button
-                  key={kind}
-                  title={`+ ${kind}`}
-                  size="sm"
-                  pill
-                  variant="secondary"
-                  onPress={() => addColumn(kind)}
-                />
-              ),
-            )}
-          </View>
-
-          {columns.map((column) => {
-            const focused = focusedColumnId === column.id;
-            return (
-              <Surface
-                key={column.id}
-                tone="muted"
-                padded
-                elevation="none"
-                style={{
-                  gap: theme.spacing[2],
-                  borderWidth: focused ? 2 : StyleSheet.hairlineWidth,
-                  borderColor: focused ? theme.colors.primary : theme.colors.border,
-                }}
-              >
-                {focused ? (
-                  <Text variant="caption" colorKey="primary">
-                    Nueva columna — personalízala aquí
-                  </Text>
-                ) : null}
-                <TextInput
-                  value={column.name}
-                  onChangeText={(name) =>
-                    setColumns((prev) =>
-                      prev.map((c) => (c.id === column.id ? { ...c, name } : c)),
-                    )
-                  }
-                />
-                <Text variant="caption" colorKey="textSecondary">
-                  Tipo: {column.kind}
-                </Text>
-
-                {column.kind === 'category' ? (
+            <Surface padded elevation="sm" style={{ gap: theme.spacing[2], flex: wide ? 2 : undefined }}>
+              <Text variant="overline">Variables globales</Text>
+              <Text variant="caption" colorKey="textSecondary">
+                Valores fijos de la lista que usan las columnas de cálculo (ej. precio del kWh).
+              </Text>
+              {globals.map((g, index) => (
+                <View key={g.id} style={{ flexDirection: 'row', gap: theme.spacing[2] }}>
                   <TextInput
-                    value={(column.options ?? []).join(', ')}
+                    style={{ flex: 2, minWidth: 0 }}
+                    value={g.label}
+                    onChangeText={(label) =>
+                      setGlobals((prev) => prev.map((x, i) => (i === index ? { ...x, label } : x)))
+                    }
+                    placeholder="Nombre"
+                  />
+                  <TextInput
+                    style={{ flex: 1, minWidth: 0 }}
+                    value={String(g.value)}
+                    keyboardType="decimal-pad"
                     onChangeText={(text) =>
-                      setColumns((prev) =>
-                        prev.map((c) =>
-                          c.id === column.id
-                            ? {
-                                ...c,
-                                options: text
-                                  .split(',')
-                                  .map((s) => s.trim())
-                                  .filter(Boolean),
-                              }
-                            : c,
-                        ),
+                      setGlobals((prev) =>
+                        prev.map((x, i) => (i === index ? { ...x, value: Number(text) || 0 } : x)),
                       )
                     }
-                    placeholder="Opciones separadas por coma"
+                    placeholder="Valor"
                   />
-                ) : null}
+                </View>
+              ))}
+              <Button
+                title="+ Agregar variable"
+                variant="secondary"
+                size="sm"
+                pill
+                style={{ alignSelf: 'flex-start' }}
+                onPress={addGlobal}
+              />
+            </Surface>
+          </View>
 
-                {column.calc ? (
-                  <CalcEditor
-                    column={column}
-                    columns={columns}
-                    globals={globals}
-                    onChange={(next) =>
-                      setColumns((prev) => prev.map((c) => (c.id === column.id ? next : c)))
-                    }
-                  />
-                ) : null}
+          <View style={{ gap: theme.spacing[3] }}>
+            <SectionHeader
+              title="Criterios del ranking"
+              count={rankedColumns.length}
+              hint="Columnas que suman puntos. Activa “Usar en el ranking” en una columna numérica para que aparezca aquí."
+            />
+            <Grid
+              columns={Math.min(gridColumns, 2)}
+              gap={theme.spacing[3]}
+            >
+              {rankedColumns.map(renderColumnCard)}
+            </Grid>
+          </View>
 
-                {column.rank ? (
-                  <RankEditor
-                    column={column}
-                    onChange={(next) =>
-                      setColumns((prev) => prev.map((c) => (c.id === column.id ? next : c)))
-                    }
-                  />
-                ) : null}
-
-                <Button
-                  title="Eliminar columna"
-                  variant="danger"
-                  size="sm"
-                  pill
-                  onPress={() => removeColumn(column.id)}
-                />
-              </Surface>
-            );
-          })}
-        </Surface>
+          <View style={{ gap: theme.spacing[3] }}>
+            <SectionHeader
+              title="Datos y cálculos"
+              count={dataColumns.length}
+              hint="Columnas informativas: se muestran en la tabla y alimentan los cálculos, pero no suman puntos."
+            />
+            <Grid
+              columns={gridColumns}
+              gap={theme.spacing[3]}
+            >
+              {dataColumns.map(renderColumnCard)}
+            </Grid>
+          </View>
+        </View>
       </ScrollView>
 
       {toast ? (
@@ -397,17 +513,32 @@ export default function SchemaScreen() {
             paddingBottom: footerPadding,
             backgroundColor: theme.colors.surface,
             borderTopColor: theme.colors.border,
-            gap: theme.spacing[2],
+            alignItems: 'center',
           },
         ]}
       >
-        <Button
-          title="Guardar esquema"
-          pill
-          onPress={() => void onSave()}
-          disabled={!weightCheck.ok && columns.some((c) => c.rank)}
-        />
-        <Button title="Cancelar" variant="ghost" onPress={() => safeGoBack(`/lists/${listId}` as Href)} />
+        <View
+          style={{
+            width: '100%',
+            maxWidth: SCHEMA_MAX_WIDTH,
+            flexDirection: wide ? 'row-reverse' : 'column',
+            gap: theme.spacing[2],
+          }}
+        >
+          <Button
+            title="Guardar esquema"
+            pill
+            style={wide ? { minWidth: 220 } : undefined}
+            onPress={() => void onSave()}
+            disabled={!weightCheck.ok && columns.some((c) => c.rank)}
+          />
+          <Button
+            title="Cancelar"
+            variant="ghost"
+            pill={wide}
+            onPress={() => safeGoBack(`/lists/${listId}` as Href)}
+          />
+        </View>
       </View>
     </View>
   );
@@ -436,14 +567,17 @@ function CalcEditor({
   column,
   columns,
   globals,
+  defaultOpen,
   onChange,
 }: {
   column: ListColumn;
   columns: ListColumn[];
   globals: ListGlobal[];
+  defaultOpen: boolean;
   onChange: (c: ListColumn) => void;
 }) {
   const theme = useTheme();
+  const [open, setOpen] = useState(defaultOpen);
   const calc = column.calc!;
   const meta = CALC_OPS.find((o) => o.op === calc.op) ?? CALC_OPS[0];
 
@@ -478,48 +612,91 @@ function CalcEditor({
     onChange({ ...column, calc: { op, leftRef, rightRef } });
   }
 
+  const refLabel = (ref: ValueRef) =>
+    [...columnOptions, ...globalOptions].find((o) => o.ref === ref)?.label ?? '?';
+
+  const summary = (
+    <View
+      style={{
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: theme.spacing[2],
+        padding: theme.spacing[3],
+        borderRadius: theme.radius.md,
+        backgroundColor: theme.colors.surfaceMuted,
+      }}
+    >
+      <View style={{ flexShrink: 1, gap: theme.spacing[1] }}>
+        <Text variant="overline">Fórmula</Text>
+        <Text variant="label">= {formatCalcFormula(calc.op, refLabel(calc.leftRef), refLabel(calc.rightRef))}</Text>
+      </View>
+      <Button
+        title={open ? 'Listo' : 'Editar cálculo'}
+        size="sm"
+        pill
+        variant={open ? 'primary' : 'secondary'}
+        onPress={() => {
+          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+          setOpen((v) => !v);
+        }}
+      />
+    </View>
+  );
+
+  if (!open) return summary;
+
   return (
     <View style={{ gap: theme.spacing[3] }}>
-      <Text variant="label">Tipo de cálculo</Text>
+      {summary}
       <View style={{ gap: theme.spacing[2] }}>
-        {CALC_OPS.map((op) => (
-          <Button
-            key={op.op}
-            title={op.label}
-            size="sm"
-            pill
-            variant={calc.op === op.op ? 'primary' : 'secondary'}
-            onPress={() => changeOp(op.op)}
-          />
-        ))}
+        <Text variant="label">Tipo de cálculo</Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing[2] }}>
+          {CALC_OPS.map((op) => (
+            <Button
+              key={op.op}
+              title={op.label}
+              size="sm"
+              pill
+              variant={calc.op === op.op ? 'primary' : 'secondary'}
+              onPress={() => changeOp(op.op)}
+            />
+          ))}
+        </View>
+        <Text variant="caption" colorKey="textSecondary">
+          {meta.description} Ej.: {meta.example}
+        </Text>
       </View>
-      <Text variant="caption" colorKey="textSecondary">
-        Ej.: {meta.example}
-      </Text>
 
-      <OperandPicker
-        label={meta.leftLabel}
-        value={calc.leftRef}
-        options={leftOptions}
-        emptyMessage={
-          meta.left === 'global'
-            ? 'Agrega una variable global arriba para usarla aquí.'
-            : 'Agrega otra columna numérica/calculada para operar.'
-        }
-        onChange={(leftRef) => onChange({ ...column, calc: { ...calc, leftRef } })}
-      />
-
-      <OperandPicker
-        label={meta.rightLabel}
-        value={calc.rightRef}
-        options={rightOptions}
-        emptyMessage={
-          meta.right === 'global'
-            ? 'Agrega una variable global arriba para usarla aquí.'
-            : 'Agrega otra columna numérica/calculada para operar.'
-        }
-        onChange={(rightRef) => onChange({ ...column, calc: { ...calc, rightRef } })}
-      />
+      <View style={{ gap: theme.spacing[4] }}>
+        <View>
+          <OperandPicker
+            label={meta.leftLabel}
+            value={calc.leftRef}
+            options={leftOptions}
+            emptyMessage={
+              meta.left === 'global'
+                ? 'Agrega una variable global arriba para usarla aquí.'
+                : 'Agrega otra columna numérica/calculada para operar.'
+            }
+            onChange={(leftRef) => onChange({ ...column, calc: { ...calc, leftRef } })}
+          />
+        </View>
+        <View>
+          <OperandPicker
+            label={meta.rightLabel}
+            value={calc.rightRef}
+            options={rightOptions}
+            emptyMessage={
+              meta.right === 'global'
+                ? 'Agrega una variable global arriba para usarla aquí.'
+                : 'Agrega otra columna numérica/calculada para operar.'
+            }
+            onChange={(rightRef) => onChange({ ...column, calc: { ...calc, rightRef } })}
+          />
+        </View>
+      </View>
     </View>
   );
 }
@@ -533,69 +710,179 @@ function RankEditor({
 }) {
   const theme = useTheme();
   const rank = column.rank!;
+  const example = buildRankExample(rank.direction, rank.target.mode);
+
+  const controls = (
+    <View style={{ gap: theme.spacing[3] }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing[4] }}>
+        <View style={{ gap: theme.spacing[1] }}>
+          <Text variant="label">Peso</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing[2] }}>
+            <TextInput
+              style={{ width: 88 }}
+              value={String(rank.weight)}
+              keyboardType="decimal-pad"
+              onChangeText={(text) =>
+                onChange({
+                  ...column,
+                  rank: { ...rank, weight: Number(text) || 0 },
+                })
+              }
+              placeholder="0"
+            />
+            <Text colorKey="textSecondary">%</Text>
+          </View>
+        </View>
+
+        <View style={{ gap: theme.spacing[1], flexShrink: 1 }}>
+          <Text variant="label">¿Qué es mejor?</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing[2] }}>
+            {(['lowerBetter', 'higherBetter'] as RankDirection[]).map((direction) => (
+              <Button
+                key={direction}
+                title={RANK_DIRECTION_HELP[direction].label}
+                size="sm"
+                pill
+                variant={rank.direction === direction ? 'primary' : 'secondary'}
+                onPress={() =>
+                  onChange({
+                    ...column,
+                    rank: {
+                      ...rank,
+                      direction,
+                      // Si el objetivo era el recomendado, se mueve al recomendado del nuevo sentido.
+                      target:
+                        rank.target.mode === RECOMMENDED_TARGET[rank.direction]
+                          ? { ...rank.target, mode: RECOMMENDED_TARGET[direction] }
+                          : rank.target,
+                    },
+                  })
+                }
+              />
+            ))}
+          </View>
+        </View>
+      </View>
+
+      <View style={{ gap: theme.spacing[1] }}>
+        <Text variant="label">Objetivo — el valor que saca 100 puntos</Text>
+        <View
+          style={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            gap: theme.spacing[2],
+          }}
+        >
+          {(['min', 'max', 'avg', 'custom'] as TargetMode[]).map((mode) => (
+            <Button
+              key={mode}
+              title={
+                mode === RECOMMENDED_TARGET[rank.direction]
+                  ? `${TARGET_MODE_HELP[mode].label} ★`
+                  : TARGET_MODE_HELP[mode].label
+              }
+              size="sm"
+              pill
+              variant={rank.target.mode === mode ? 'primary' : 'secondary'}
+              onPress={() =>
+                onChange({
+                  ...column,
+                  rank: {
+                    ...rank,
+                    target: { mode, customValue: rank.target.customValue ?? 0 },
+                  },
+                })
+              }
+            />
+          ))}
+          {rank.target.mode === 'custom' ? (
+            <TextInput
+              style={{ width: 160 }}
+              value={String(rank.target.customValue ?? 0)}
+              keyboardType="decimal-pad"
+              onChangeText={(text) =>
+                onChange({
+                  ...column,
+                  rank: {
+                    ...rank,
+                    target: { mode: 'custom', customValue: Number(text) || 0 },
+                  },
+                })
+              }
+              placeholder="Valor objetivo"
+            />
+          ) : null}
+        </View>
+        <Text variant="caption" colorKey="textSecondary">
+          {TARGET_MODE_HELP[rank.target.mode].description} ★ = recomendado para “
+          {RANK_DIRECTION_HELP[rank.direction].label.toLowerCase()}”.
+        </Text>
+      </View>
+    </View>
+  );
+
+  const exampleBox = (
+    <View
+      style={{
+        gap: theme.spacing[1],
+        padding: theme.spacing[3],
+        borderRadius: theme.radius.md,
+        backgroundColor: theme.colors.surfaceMuted,
+      }}
+    >
+      <Text variant="overline">Ejemplo con esta configuración</Text>
+      <Text variant="caption">{example.summary}</Text>
+      {example.rows.map((row) => (
+        <View key={row.name} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <Text variant="caption" colorKey="textSecondary">
+            {row.name} · {row.value}
+          </Text>
+          <Text variant="caption">{row.score} pts</Text>
+        </View>
+      ))}
+      {example.warning ? (
+        <Text
+          variant="caption"
+          style={{
+            marginTop: theme.spacing[1],
+            padding: theme.spacing[2],
+            borderRadius: theme.radius.sm,
+            backgroundColor: theme.colors.warningSoft,
+          }}
+        >
+          ⚠ {example.warning}
+        </Text>
+      ) : null}
+    </View>
+  );
 
   return (
-    <View style={{ gap: theme.spacing[2] }}>
-      <Text variant="label">Criterio de ranking</Text>
-      <TextInput
-        value={String(rank.weight)}
-        keyboardType="decimal-pad"
-        onChangeText={(text) =>
-          onChange({
-            ...column,
-            rank: { ...rank, weight: Number(text) || 0 },
-          })
-        }
-        placeholder="Peso %"
-      />
-      <View style={{ flexDirection: 'row', gap: theme.spacing[2] }}>
-        {(['lowerBetter', 'higherBetter'] as RankDirection[]).map((direction) => (
-          <Button
-            key={direction}
-            title={direction === 'lowerBetter' ? 'Menor mejor' : 'Mayor mejor'}
-            size="sm"
-            pill
-            variant={rank.direction === direction ? 'primary' : 'secondary'}
-            onPress={() => onChange({ ...column, rank: { ...rank, direction } })}
-          />
-        ))}
+    <View
+      style={{
+        gap: theme.spacing[4],
+        paddingTop: theme.spacing[3],
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopColor: theme.colors.border,
+      }}
+    >
+      {controls}
+      {exampleBox}
+    </View>
+  );
+}
+
+function SectionHeader({ title, count, hint }: { title: string; count: number; hint: string }) {
+  const theme = useTheme();
+  return (
+    <View style={{ gap: theme.spacing[1], paddingHorizontal: theme.spacing[1] }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing[2] }}>
+        <Text variant="subtitle">{title}</Text>
+        <Badge label={String(count)} style={{ alignSelf: 'center' }} />
       </View>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing[2] }}>
-        {(['min', 'max', 'avg', 'custom'] as TargetMode[]).map((mode) => (
-          <Button
-            key={mode}
-            title={mode}
-            size="sm"
-            pill
-            variant={rank.target.mode === mode ? 'primary' : 'secondary'}
-            onPress={() =>
-              onChange({
-                ...column,
-                rank: {
-                  ...rank,
-                  target: { mode, customValue: rank.target.customValue ?? 0 },
-                },
-              })
-            }
-          />
-        ))}
-      </View>
-      {rank.target.mode === 'custom' ? (
-        <TextInput
-          value={String(rank.target.customValue ?? 0)}
-          keyboardType="decimal-pad"
-          onChangeText={(text) =>
-            onChange({
-              ...column,
-              rank: {
-                ...rank,
-                target: { mode: 'custom', customValue: Number(text) || 0 },
-              },
-            })
-          }
-          placeholder="Valor objetivo"
-        />
-      ) : null}
+      <Text variant="caption" colorKey="textSecondary">
+        {hint}
+      </Text>
     </View>
   );
 }

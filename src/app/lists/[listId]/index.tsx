@@ -117,6 +117,13 @@ export default function ListDetailScreen() {
             pill
             onPress={() => router.push(`/lists/${listId}/items/new` as Href)}
           />
+          <Button
+            title="Agregar masivo"
+            variant="secondary"
+            size="sm"
+            pill
+            onPress={() => router.push(`/lists/${listId}/items/import` as Href)}
+          />
         </View>
 
         <RankingTable

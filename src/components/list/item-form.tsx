@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Surface } from '@/components/ui/surface';
 import { Text } from '@/components/ui/text';
 import { TextInput } from '@/components/ui/text-input';
-import type { FieldValue, Item } from '@/domain';
+import { editableColumns as getEditableColumns, type FieldValue, type Item } from '@/domain';
 import { useTheme } from '@/hooks/use-theme';
 import { safeGoBack } from '@/navigation/safe-go-back';
 import { useLists } from '@/state/lists-context';
@@ -40,14 +40,7 @@ export function ItemForm({ mode }: { mode: 'new' | 'edit' }) {
   }
 
   const item = draft ?? baseItem;
-  const editableColumns = bundle.columns.filter(
-    (c) =>
-      c.kind === 'text' ||
-      c.kind === 'number' ||
-      c.kind === 'image' ||
-      c.kind === 'category' ||
-      (c.kind === 'criterion' && !c.calc),
-  );
+  const editableColumns = getEditableColumns(bundle.columns);
 
   function setValue(columnId: string, value: FieldValue) {
     setDraft({
