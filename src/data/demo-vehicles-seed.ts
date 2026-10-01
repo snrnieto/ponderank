@@ -1,7 +1,7 @@
 import type { ComparisonListBundle, Item, ListColumn, ListGlobal } from '@/domain';
 import { createId } from './lists-repository';
 
-/** Demo data mirrored from `Comparativa compras.xlsx` (Vehiculos usados). */
+/** Demo data for the "Vehículos usados" list. */
 export function buildDemoVehiclesBundle(): ComparisonListBundle {
   const listId = 'list_demo_vehicles';
   const now = '2026-07-24T00:00:00.000Z';

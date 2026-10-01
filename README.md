@@ -98,7 +98,7 @@ Sin EAS: abre `android/` en Android Studio y `ios/` en Xcode para firmar y subir
 
 ## Demo seed
 
-Por defecto los usuarios nuevos empiezan sin listas. Para cargar la lista demo **Vehículos usados** (datos de `Comparativa compras.xlsx`) cuando el storage está vacío, por ejemplo en desarrollo:
+Por defecto los usuarios nuevos empiezan sin listas. Para cargar la lista demo **Vehículos usados** cuando el storage está vacío, por ejemplo en desarrollo:
 
 ```bash
 # .env
@@ -106,6 +106,18 @@ EXPO_PUBLIC_ENABLE_DEMO_SEED=true
 ```
 
 O elimina `src/data/demo-vehicles-seed.ts` y la llamada en el repositorio.
+
+## Búsqueda en tiendas (afiliados)
+
+La opción ganadora del ranking y la pantalla de edición de cada opción muestran **Buscar en Amazon** y **Buscar en Mercado Libre**, usando el nombre de la opción como búsqueda. Sin configuración, los botones funcionan sin comisión. Para activar los afiliados, define en `.env`:
+
+```bash
+EXPO_PUBLIC_AMAZON_TAG=tu-tag-20                 # Amazon Associates
+EXPO_PUBLIC_MELI_AFFILIATE_QUERY=clave=valor     # parámetros del portal de afiliados de Mercado Libre
+# Opcionales: EXPO_PUBLIC_AMAZON_DOMAIN (amazon.com), EXPO_PUBLIC_MELI_DOMAIN (mercadolibre.com.co)
+```
+
+Con algún código configurado se muestra el aviso de comisiones que exigen los programas de afiliados. La lógica de las URLs está en `src/domain/store-search.ts`.
 
 ## Design system
 
@@ -125,3 +137,9 @@ La persistencia pasa por `ListsRepository` (`src/data/lists-repository.ts`). Hoy
 - `src/theme/` — design tokens
 - `src/components/ui/` — Button, Text, TextInput, Surface
 - `src/app/` — pantallas expo-router
+
+## Licencia
+
+[MIT](LICENSE) © 2026 Sebastian Nieto. Puedes usar, modificar y redistribuir el código libremente, manteniendo el aviso de copyright.
+
+El nombre y el logo de Ponderank no están cubiertos por la licencia: los forks deben usar otro nombre.

@@ -1,6 +1,6 @@
 # Ponderank
 
-App personal Expo (web + móvil) para decidir qué comprar. El usuario crea **listas de comparación** de cualquier categoría (vehículos, computadores, veterinarias…), define un **esquema de columnas** propio por lista, agrega productos/opciones (items) por formulario, y la app calcula un **ranking ponderado** de cuál es la mejor opción. Reemplaza una hoja de cálculo con fórmulas manuales (ver `Comparativa compras.xlsx`, origen del seed de demo "Vehículos usados").
+App personal Expo (web + móvil) para decidir qué comprar. El usuario crea **listas de comparación** de cualquier categoría (vehículos, computadores, veterinarias…), define un **esquema de columnas** propio por lista, agrega productos/opciones (items) por formulario, y la app calcula un **ranking ponderado** de cuál es la mejor opción. Reemplaza una hoja de cálculo con fórmulas manuales (origen del seed de demo "Vehículos usados").
 
 Requisitos de producto y decisiones: [docs/brainstorms/2026-07-24-item-ranking-comparator-requirements.md](docs/brainstorms/2026-07-24-item-ranking-comparator-requirements.md). Plan de implementación: [docs/plans/2026-07-24-001-feat-item-ranking-comparator-plan.md](docs/plans/2026-07-24-001-feat-item-ranking-comparator-plan.md).
 
@@ -22,7 +22,7 @@ pnpm test                  # vitest run (src/**/*.test.ts, entorno node)
 pnpm test:watch
 pnpm vitest run src/domain/ranking.test.ts   # un solo archivo
 pnpm vitest run -t "nombre del test"         # un solo test
-pnpm exec tsc --noEmit     # type-check
+pnpm typecheck             # tsc --noEmit
 ```
 
 Simular producción sin EAS: `pnpm expo run:android --device --variant release` (iOS: `--configuration Release`). Web estático: `pnpm expo export --platform web`. Detalles en el README.

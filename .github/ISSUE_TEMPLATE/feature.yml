@@ -1,0 +1,23 @@
+name: Proponer una mejora
+description: Una idea para que Ponderank sea más útil
+labels: [mejora]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: ¿Qué problema tienes?
+      description: Cuéntanos qué intentabas hacer y qué te lo impidió o complicó.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: ¿Cómo te imaginas la solución?
+    validations:
+      required: true
+  - type: checkboxes
+    id: help
+    attributes:
+      label: ¿Quieres programarla?
+      options:
+        - label: Me gustaría hacer el pull request yo

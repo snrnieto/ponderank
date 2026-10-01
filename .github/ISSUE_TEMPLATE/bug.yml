@@ -1,0 +1,43 @@
+name: Reportar un error
+description: Algo no funciona como debería
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: ¿Qué pasó?
+      description: Describe el error. Si puedes, agrega una captura de pantalla.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Pasos para reproducirlo
+      placeholder: |
+        1. Abrí la lista...
+        2. Cambié el peso de...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: ¿Qué esperabas que pasara?
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: ¿Dónde lo viste?
+      options:
+        - Web en computador
+        - Web en celular
+        - App Android
+        - App iOS
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Navegador o dispositivo
+      placeholder: Chrome 140 en Windows, Safari en iPhone 15...

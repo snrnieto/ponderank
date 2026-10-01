@@ -26,7 +26,7 @@ Traceability to origin `docs/brainstorms/2026-07-24-item-ranking-comparator-requ
 - R9–R14. Criterios: peso, objetivo (min/max/avg/custom), sentido; scores con tope 100%; pesos = 100%; faltante = 0%.
 - R15–R18. Orden por cualquier columna; toggle % parciales; filtro por categoría; al filtrar preguntar si recalcular o mantener.
 - R19–R20. Web + móvil; almacenamiento local desacoplado del dominio.
-- Extra (plan): seed demo vehículos desde `Comparativa compras.xlsx`, fácil de quitar para productivo.
+- Extra (plan): seed demo vehículos, fácil de quitar para productivo.
 - Extra (plan): design system configurable desde un archivo central de tokens; pantallas y controles no hardcodean colores ni tipografías.
 
 ---
@@ -355,13 +355,12 @@ Item { id, listId, values: Record<columnId, string|number|null>, createdAt }
 
 - Expo SDK 57 docs: https://docs.expo.dev/versions/v57.0.0/
 - Añadir: `@react-native-async-storage/async-storage`, `vitest`, `expo-image-picker`, `expo-file-system` (versiones compatibles SDK 57).
-- Referencia de datos: `Comparativa compras.xlsx`
 
 ---
 
 ## Sources & Research
 
 - Origin requirements: `docs/brainstorms/2026-07-24-item-ranking-comparator-requirements.md`
-- Excel: `Comparativa compras.xlsx` (ranking `min(1,target/value)*weight`, globals, derived cols)
+- Hoja de cálculo original (ranking `min(1,target/value)*weight`, globals, derived cols)
 - Expo SQLite/AsyncStorage docs (Context7): SQLite kv-store es alternativa; se descartó para v1 por simplicidad web + dataset pequeño; el camino a Supabase es la interfaz del repositorio, no SQLite
 - Repo actual: Expo Router template en `src/app`, alias `@/*`, sin tests ni persistencia

@@ -192,6 +192,6 @@ Hoy la comparación se hace en hojas de cálculo (ej. vehículos a gasolina): po
 
 ## Sources / Research
 
-- Excel de referencia en el repo: `Comparativa compras.xlsx` (hoja "Vehiculos usados"), tabla con columnas Imagen, Nombre, Tipo, Precio, Puestos, Precio por pasajero, Precio por km, 0-100, Ranking, y columnas informativas derivadas (Piendamo, Día normal).
+- Hoja de cálculo de referencia (vehículos usados), tabla con columnas Imagen, Nombre, Tipo, Precio, Puestos, Precio por pasajero, Precio por km, 0-100, Ranking, y columnas informativas derivadas (Piendamo, Día normal).
 - Fórmula de ranking observada: `min(1, target/valor) × peso` sumado por criterios (todos "menor mejor" en esa hoja); pesos en fila 4; objetivos en fila 5 (uno dinámico vía MIN de columna).
 - Variable global: precio galón alimenta precio por km como `precio_galon / consumo_km_por_galon` (el consumo estaba incrustado en fórmulas; en la app debe ser campo explícito del item o columna).

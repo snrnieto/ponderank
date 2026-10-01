@@ -22,7 +22,7 @@ El ranking sale de los criterios y pesos de la propia persona, no de una reseña
 
 - Se usa sobre todo en el navegador (web primero). Existe una base Expo para iOS/Android, pero la app móvil no está publicada ni tiene fecha.
 - Flujo: crear lista → definir esquema (columnas de texto, número, imagen, categoría y cálculo; activar "usar en el ranking" con peso, sentido y objetivo) → agregar opciones a mano o en masa pegando un JSON generado con una IA externa a partir de una plantilla que da la app → ver el ranking, filtrar por categoría y abrir la explicación del top 3.
-- Origen: una hoja de cálculo real de comparación de vehículos usados (`Comparativa compras.xlsx`).
+- Origen: una hoja de cálculo real de comparación de vehículos usados.
 
 ## Capabilities and Constraints
 
