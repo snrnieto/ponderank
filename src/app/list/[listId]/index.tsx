@@ -126,7 +126,8 @@ export default function ListDetailScreen() {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView style={{ flex: 1, width: '100%' }} contentContainerStyle={{ flexGrow: 1, width: '100%', paddingBottom: 96 }}>
-        <PageShell maxWidth={1200}>
+        {/* La tabla necesita ancho: en pantallas grandes se usa casi todo para evitar el scroll horizontal. */}
+        <PageShell maxWidth={1680}>
           <PageTitle parts={[bundle.list.name]} />
 
           {!ready ? (

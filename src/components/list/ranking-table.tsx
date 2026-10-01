@@ -3,6 +3,7 @@ import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
 
+import { StoreDisclosure, StoreSearchChips } from '@/components/list/store-search-links';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Surface } from '@/components/ui/surface';
 import { Text } from '@/components/ui/text';
@@ -35,6 +36,7 @@ type Props = {
 };
 
 const MOBILE_BREAKPOINT = 720;
+const STORE_COL_WIDTH = 210;
 
 /** Nota de 0 a 100 con un decimal fijo. */
 export function formatScore(total: number, locale: Locale = 'es'): string {
@@ -187,18 +189,26 @@ export function RankingTable({ bundle, rows, showPartials, onEditItem, onExplain
                     ))}
                   </View>
                 ) : null}
+                {!selection ? <StoreSearchChips query={row.name} /> : null}
               </Surface>
             </Pressable>
           );
         })}
+        {!selection ? <StoreDisclosure /> : null}
       </View>
     );
   }
 
-  const colWidth = 140;
-  const minWidth = (selection ? 40 : 0) + 64 + (imageCol ? 60 : 0) + 220 + 96 + 44 + (criteria.length + info.length) * colWidth;
+  const colWidth = 120;
+  const cellCount = (selection ? 1 : 0) + 1 + (imageCol ? 1 : 0) + 1 + 1 + 1 + (selection ? 0 : 1) + criteria.length + info.length;
+  // Suma también los espacios entre celdas y el padding de la fila; si no, las columnas de datos se encogen y cortan cifras.
+  const minWidth =
+    (selection ? 28 : 0) + 64 + (imageCol ? 60 : 0) + 220 + 96 + 44 + (selection ? 0 : STORE_COL_WIDTH) +
+    (criteria.length + info.length) * colWidth +
+    (cellCount - 1) * theme.spacing[3] +
+    theme.spacing[4] * 2;
   const tableWidth = Math.max(minWidth, containerWidth);
-  const numberCell = { width: colWidth, textAlign: 'right' as const, paddingRight: theme.spacing[3] };
+  const numberCell = { width: colWidth, flexShrink: 0, textAlign: 'right' as const, paddingRight: theme.spacing[3] };
 
   return (
     <View style={{ width: '100%' }} onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}>
@@ -237,8 +247,13 @@ export function RankingTable({ bundle, rows, showPartials, onEditItem, onExplain
               {t.table.finalScore}
             </Text>
             <View style={styles.explainCol} />
+            {!selection ? (
+              <Text variant="overline" style={styles.storeCol}>
+                {t.store.column}
+              </Text>
+            ) : null}
             {criteria.map((c) => (
-              <View key={c.id} style={{ width: colWidth, alignItems: 'flex-end', paddingRight: theme.spacing[3] }}>
+              <View key={c.id} style={{ width: colWidth, flexShrink: 0, alignItems: 'flex-end', paddingRight: theme.spacing[3] }}>
                 <Text variant="overline" colorKey="text" numberOfLines={2} style={{ textAlign: 'right' }}>
                   {c.name}
                 </Text>
@@ -299,8 +314,13 @@ export function RankingTable({ bundle, rows, showPartials, onEditItem, onExplain
                     <ExplainButton name={row.name} position={position} onPress={() => onExplain(position)} />
                   ) : null}
                 </View>
+                {!selection ? (
+                  <View style={styles.storeCol}>
+                    <StoreSearchChips query={row.name} />
+                  </View>
+                ) : null}
                 {criteria.map((c) => (
-                  <View key={c.id} style={{ width: colWidth, alignItems: 'flex-end', paddingRight: theme.spacing[3] }}>
+                  <View key={c.id} style={{ width: colWidth, flexShrink: 0, alignItems: 'flex-end', paddingRight: theme.spacing[3] }}>
                     <Text variant="figure" style={{ fontWeight: theme.typography.weights.medium }} numberOfLines={1}>
                       {formatValue(row.resolvedValues[c.id], locale)}
                     </Text>
@@ -330,6 +350,11 @@ export function RankingTable({ bundle, rows, showPartials, onEditItem, onExplain
           })}
         </View>
       </ScrollView>
+      {!selection ? (
+        <View style={{ paddingHorizontal: theme.spacing[4], paddingTop: theme.spacing[3] }}>
+          <StoreDisclosure />
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -342,6 +367,7 @@ const styles = StyleSheet.create({
   nameCol: { flex: 1, minWidth: 220 },
   scoreCol: { width: 96, flexShrink: 0 },
   explainCol: { width: 44, flexShrink: 0 },
+  storeCol: { width: STORE_COL_WIDTH, flexShrink: 0 },
   thumb: { width: 48, height: 48 },
   rankBadge: {
     width: 36,

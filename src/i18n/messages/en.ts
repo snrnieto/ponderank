@@ -145,6 +145,13 @@ export const en: Messages = {
     of100: 'out of 100',
     why: 'See why',
   },
+  store: {
+    searchIn: { amazon: 'Search on Amazon', mercadolibre: 'Search on Mercado Libre' },
+    short: { amazon: 'Amazon', mercadolibre: 'Mercado Libre' },
+    column: 'Search on',
+    searchA11y: (action: string, name: string) => `${action}: ${name} (opens a new tab)`,
+    disclosure: 'We may earn a commission if you buy through these links, at no extra cost to you. It keeps Ponderank free.',
+  },
   table: {
     position: 'Rank',
     option: 'Option',

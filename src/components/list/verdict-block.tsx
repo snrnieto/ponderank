@@ -2,6 +2,7 @@ import { Image } from 'expo-image';
 import { View, useWindowDimensions } from 'react-native';
 
 import { formatScore } from '@/components/list/ranking-table';
+import { StoreSearchLinks } from '@/components/list/store-search-links';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import type { RankExplanation } from '@/domain';
@@ -79,6 +80,10 @@ export function VerdictBlock({ winner, image, optionCount, onExplain }: Props) {
           <Text variant="caption" color={onBrand} style={{ opacity: 0.8 }}>
             {t.verdict.among(t.common.options(optionCount))}
           </Text>
+          <View style={{ marginTop: theme.spacing[2] }}>
+            {/* El aviso de comisiones va bajo la tabla del ranking, que está en la misma pantalla. */}
+            <StoreSearchLinks query={winner.name} disclosure={false} />
+          </View>
         </View>
       </View>
 

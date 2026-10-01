@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 
 import { ImageFieldInput } from '@/components/list/image-field-input';
+import { StoreSearchLinks } from '@/components/list/store-search-links';
 import { Button } from '@/components/ui/button';
 import { confirmAction } from '@/components/ui/confirm-action';
 import { NumberInput } from '@/components/ui/number-input';
@@ -208,6 +209,8 @@ function ItemEditor({ mode, bundle, initial }: { mode: 'new' | 'edit'; bundle: C
             );
           })}
         </Surface>
+
+        {mode === 'edit' && !nameMissing ? <StoreSearchLinks query={displayName} /> : null}
 
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: theme.spacing[2] }}>
           {mode === 'edit' ? <Button title={t.item.deleteOption} variant="danger" size="sm" onPress={onDelete} /> : null}

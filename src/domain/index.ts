@@ -9,3 +9,4 @@ export * from './import-plan';
 export * from './decimal-input';
 export * from './ranking-explain';
 export * from './locale';
+export * from './store-search';

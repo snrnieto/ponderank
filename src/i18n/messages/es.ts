@@ -143,6 +143,13 @@ export const es = {
     of100: 'de 100',
     why: 'Ver por qué',
   },
+  store: {
+    searchIn: { amazon: 'Buscar en Amazon', mercadolibre: 'Buscar en Mercado Libre' },
+    short: { amazon: 'Amazon', mercadolibre: 'Mercado Libre' },
+    column: 'Buscar en',
+    searchA11y: (action: string, name: string) => `${action}: ${name} (abre una pestaña nueva)`,
+    disclosure: 'Si compras desde estos enlaces podemos recibir una comisión, sin costo extra para ti. Así Ponderank sigue gratis.',
+  },
   table: {
     position: 'Puesto',
     option: 'Opción',
