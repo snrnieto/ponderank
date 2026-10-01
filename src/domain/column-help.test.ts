@@ -9,6 +9,7 @@ describe('buildRankExample', () => {
     const ex = buildRankExample('lowerBetter', 'min');
     expect(scores(ex)).toEqual([100, 80, 67]);
     expect(ex.summary).toContain('$80 M');
+    expect(buildRankExample('lowerBetter', 'min', 'en').summary).toContain('Price of $80 M');
     expect(ex.warning).toBeUndefined();
   });
 
@@ -16,6 +17,7 @@ describe('buildRankExample', () => {
     const ex = buildRankExample('lowerBetter', 'max');
     expect(scores(ex)).toEqual([100, 100, 100]);
     expect(ex.warning).toContain('El menor de la lista');
+    expect(buildRankExample('lowerBetter', 'max', 'en').warning).toContain('The lowest in the list');
   });
 
   it('lowerBetter + avg and custom', () => {

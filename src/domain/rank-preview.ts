@@ -16,10 +16,10 @@ export type TargetPreview = {
 };
 
 /** Nombre visible de un item: su primera columna de texto. */
-export function itemDisplayName(item: Item, columns: ListColumn[]): string {
+export function itemDisplayName(item: Item, columns: ListColumn[], fallback = 'Sin nombre'): string {
   const textColumn = columns.find((c) => c.kind === 'text');
   const value = textColumn ? item.values[textColumn.id] : null;
-  return typeof value === 'string' && value.trim() !== '' ? value : 'Sin nombre';
+  return typeof value === 'string' && value.trim() !== '' ? value : fallback;
 }
 
 /**

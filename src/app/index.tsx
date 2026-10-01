@@ -1,120 +1,203 @@
-import { SymbolView } from 'expo-symbols';
+import { Image } from 'expo-image';
 import { useRouter, type Href } from 'expo-router';
 import { useState } from 'react';
-import { Alert, FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { ScrollView, View, useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { PageShell } from '@/components/ui/page-shell';
-import { Surface } from '@/components/ui/surface';
-import { Text } from '@/components/ui/text';
-import { TextInput } from '@/components/ui/text-input';
+import { BalanceInstrument } from '@/components/landing/balance-instrument';
+import { weigh, type CriterionId, type Weights } from '@/components/landing/balance-model';
+import { LandingButton } from '@/components/landing/landing-button';
+import { LandingText } from '@/components/landing/landing-text';
+import { WeighTicket } from '@/components/landing/weigh-ticket';
+import { LanguageSwitcher } from '@/components/ui/language-switcher';
+import { PageTitle } from '@/components/ui/page-title';
+import { APP_NAME } from '@/constants/brand';
 import { useTheme } from '@/hooks/use-theme';
-import { useLists } from '@/state/lists-context';
+import { useI18n } from '@/i18n';
 
-export default function ListsIndexScreen() {
-  const { bundles, loading, createList, deleteList } = useLists();
-  const [name, setName] = useState('');
+const APP_HREF = '/list' as Href;
+
+export default function LandingScreen() {
+  const { landing } = useTheme();
+  const { t } = useI18n();
+  const { colors } = landing;
   const router = useRouter();
-  const theme = useTheme();
+  const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const wide = width >= 960;
+  const compact = width < 480;
+  const gutter = wide ? 48 : 20;
 
-  async function onCreate() {
-    const trimmed = name.trim();
-    if (!trimmed) return;
-    const bundle = await createList(trimmed);
-    setName('');
-    router.push(`/lists/${bundle.list.id}` as Href);
-  }
+  const [weights, setWeights] = useState<Weights>({ precio: 3, bateria: 2, almacenamiento: 1 });
+  const ranking = weigh(weights);
+  const dialSize = wide ? 300 : Math.min(width - gutter * 2, 300);
 
-  function onDelete(listId: string, listName: string) {
-    Alert.alert('Eliminar lista', `¿Eliminar “${listName}”?`, [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Eliminar',
-        style: 'destructive',
-        onPress: () => {
-          void deleteList(listId);
-        },
-      },
-    ]);
-  }
+  const goToApp = () => router.push(APP_HREF);
+  const column = { width: '100%' as const, maxWidth: landing.maxWidth, alignSelf: 'center' as const };
 
   return (
-    <PageShell maxWidth={720} style={{ gap: theme.spacing[5] }}>
-      <Surface padded elevation="md">
-        <Text variant="overline">Nueva lista</Text>
-        <View style={{ height: theme.spacing[2] }} />
-        <Text variant="subtitle">Crear comparación</Text>
-        <View style={{ height: theme.spacing[3] }} />
-        <TextInput
-          value={name}
-          onChangeText={setName}
-          placeholder="Ej. Computadores"
-          onSubmitEditing={() => void onCreate()}
-        />
-        <View style={{ height: theme.spacing[3] }} />
-        <Button title="Crear lista" pill onPress={() => void onCreate()} />
-      </Surface>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.dial }}>
+      <PageTitle parts={[t.titles.landing]} />
 
-      <View style={{ gap: theme.spacing[3], flex: 1 }}>
-        <Text variant="overline">Tus listas</Text>
-        {loading ? (
-          <Text colorKey="textSecondary">Cargando…</Text>
-        ) : (
-          <FlatList
-            data={bundles}
-            keyExtractor={(item) => item.list.id}
-            contentContainerStyle={{ gap: theme.spacing[3], paddingBottom: theme.spacing[6] }}
-            ListEmptyComponent={
-              <Surface padded elevation="sm">
-                <Text colorKey="textSecondary">No hay listas todavía.</Text>
-              </Surface>
-            }
-            renderItem={({ item }) => (
-              <Surface padded elevation="sm">
-                <View style={styles.row}>
-                  <Pressable
-                    style={{ flex: 1, gap: theme.spacing[1] }}
-                    onPress={() => router.push(`/lists/${item.list.id}` as Href)}
-                  >
-                    <Text variant="label">{item.list.name}</Text>
-                    <View style={{ flexDirection: 'row', gap: theme.spacing[2], flexWrap: 'wrap' }}>
-                      <Badge label={`${item.items.length} items`} tone="primary" />
-                      <Badge label={`${item.columns.length} columnas`} tone="info" />
-                    </View>
-                  </Pressable>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={`Eliminar ${item.list.name}`}
-                    hitSlop={theme.components.hitSlop}
-                    onPress={() => onDelete(item.list.id, item.list.name)}
-                    style={[
-                      styles.iconBtn,
-                      { backgroundColor: theme.colors.dangerSoft, borderRadius: theme.radius.md },
-                    ]}
-                  >
-                    <SymbolView
-                      name={{ ios: 'trash', android: 'delete', web: 'delete' }}
-                      size={18}
-                      tintColor={theme.colors.danger}
-                    />
-                  </Pressable>
-                </View>
-              </Surface>
-            )}
-          />
-        )}
+      {/* Primera vista */}
+      <View
+        style={{
+          backgroundColor: colors.enamel,
+          paddingTop: insets.top + 20,
+          paddingBottom: wide ? 72 : 48,
+          paddingHorizontal: gutter,
+        }}
+      >
+        <View
+          style={[
+            column,
+            { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: wide ? 48 : 32 },
+          ]}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <Image
+              source={require('@/assets/images/logo.png')}
+              style={{ width: 36, height: 36 }}
+              accessibilityIgnoresInvertColors
+            />
+            <LandingText variant="title" color={colors.enamelText}>
+              {APP_NAME}
+            </LandingText>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+            {!compact && <LanguageSwitcher tone="onBrand" />}
+            <LandingButton kind="link" title={t.landing.openApp} onPress={goToApp} />
+          </View>
+        </View>
+
+        <View
+          style={[
+            column,
+            {
+              flexDirection: wide ? 'row' : 'column',
+              alignItems: wide ? 'center' : 'stretch',
+              gap: wide ? 72 : 44,
+            },
+          ]}
+        >
+          <View style={{ flex: wide ? 5 : undefined, gap: 24 }}>
+            <LandingText variant="headline" compact={!wide} color={colors.enamelText}>
+              {t.landing.headline}
+            </LandingText>
+            <LandingText variant="lead" color={colors.enamelText} style={{ maxWidth: 480 }}>
+              {t.landing.lead(APP_NAME)}
+            </LandingText>
+            <View style={{ gap: 12 }}>
+              <LandingButton title={t.landing.cta} onPress={goToApp} />
+              <LandingText variant="small" color={colors.enamelTextSoft}>
+                {t.landing.free}
+              </LandingText>
+            </View>
+          </View>
+          <View style={{ flex: wide ? 6 : undefined, maxWidth: wide ? 520 : undefined }}>
+            <BalanceInstrument
+              weights={weights}
+              ranking={ranking}
+              dialSize={dialSize}
+              onChangeWeight={(id: CriterionId, value: number) =>
+                setWeights((prev) => ({ ...prev, [id]: value }))
+              }
+            />
+          </View>
+        </View>
       </View>
-    </PageShell>
+
+      {/* Por qué gana */}
+      <View style={{ paddingHorizontal: gutter, paddingVertical: wide ? 96 : 56 }}>
+        <View
+          style={[
+            column,
+            { flexDirection: wide ? 'row' : 'column', gap: wide ? 72 : 32, alignItems: wide ? 'center' : 'stretch' },
+          ]}
+        >
+          <View style={{ flex: wide ? 1 : undefined, gap: 18, maxWidth: 460 }}>
+            <LandingText variant="section" compact={!wide}>
+              {t.landing.whyTitle}
+            </LandingText>
+            <LandingText variant="lead" color={colors.inkSoft}>
+              {t.landing.whyBody}
+            </LandingText>
+          </View>
+          <View style={{ flex: wide ? 1 : undefined, alignItems: wide ? 'flex-end' : 'stretch' }}>
+            <WeighTicket option={ranking[0]} compact={compact} />
+          </View>
+        </View>
+      </View>
+
+      {/* Cómo se usa */}
+      <View style={{ paddingHorizontal: gutter, paddingBottom: wide ? 104 : 64 }}>
+        <View
+          style={[
+            column,
+            {
+              flexDirection: wide ? 'row' : 'column',
+              gap: wide ? 72 : 24,
+              paddingTop: wide ? 48 : 32,
+              borderTopWidth: 2,
+              borderTopColor: colors.ink,
+            },
+          ]}
+        >
+          <LandingText variant="section" compact={!wide} style={{ flex: wide ? 1 : undefined, maxWidth: 460 }}>
+            {t.landing.stepsTitle}
+          </LandingText>
+          <View style={{ flex: wide ? 1 : undefined, gap: 18, maxWidth: 540 }}>
+            {t.landing.steps.map((step, index) => (
+              <View key={step} style={{ flexDirection: 'row', gap: 16, alignItems: 'baseline' }}>
+                <LandingText variant="numeral" color={colors.brassDeep} style={{ width: 28 }}>
+                  {index + 1}
+                </LandingText>
+                <LandingText variant="lead" style={{ flex: 1 }}>
+                  {step}
+                </LandingText>
+              </View>
+            ))}
+          </View>
+        </View>
+      </View>
+
+      {/* Cierre */}
+      <View
+        style={{
+          backgroundColor: colors.enamel,
+          paddingHorizontal: gutter,
+          paddingTop: wide ? 88 : 56,
+          paddingBottom: insets.bottom + (wide ? 56 : 40),
+        }}
+      >
+        <View style={[column, { gap: 28 }]}>
+          <LandingText variant="headline" compact={!wide} color={colors.enamelText} style={{ maxWidth: 760 }}>
+            {t.landing.closing}
+          </LandingText>
+          <LandingButton title={t.landing.cta} onPress={goToApp} />
+          <View
+            style={{
+              marginTop: wide ? 48 : 32,
+              paddingTop: 20,
+              borderTopWidth: 1,
+              borderTopColor: colors.enamelDeep,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 12,
+            }}
+          >
+            <LandingText variant="small" color={colors.enamelTextSoft}>
+              © {new Date().getFullYear()} {APP_NAME}
+            </LandingText>
+            {/* En pantallas angostas no cabe en la barra superior: vive aquí (nunca en los dos lugares). */}
+            {compact && <LanguageSwitcher tone="onBrand" />}
+            <LandingText variant="small" color={colors.enamelTextSoft}>
+              {t.brand.tagline}
+            </LandingText>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  iconBtn: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

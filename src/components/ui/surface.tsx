@@ -32,7 +32,7 @@ export function Surface({
   const shadowStyle: ViewStyle = elev
     ? Platform.select({
         web: {
-          boxShadow: `0 ${elev.shadowOffset.height}px ${elev.shadowRadius}px rgba(108, 92, 231, ${elev.shadowOpacity})`,
+          boxShadow: `0 ${elev.shadowOffset.height}px ${elev.shadowRadius}px rgba(20, 22, 43, ${elev.shadowOpacity})`,
         } as ViewStyle,
         default: {
           shadowColor: elev.shadowColor,

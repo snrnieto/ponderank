@@ -1,3 +1,4 @@
+import type { Locale } from './locale';
 import type { CalcOp } from './types';
 
 export type CalcOpMeta = {
@@ -11,81 +12,134 @@ export type CalcOpMeta = {
   rightLabel: string;
 };
 
-export const CALC_OPS: CalcOpMeta[] = [
-  {
-    op: 'div',
-    label: 'Dividir A ÷ B',
-    example: 'Precio ÷ Puestos → precio por pasajero',
-    description: 'Divide el valor de la columna A entre el de la columna B.',
-    left: 'column',
-    right: 'column',
-    leftLabel: 'Columna A (numerador)',
-    rightLabel: 'Columna B (denominador)',
-  },
-  {
-    op: 'mul',
-    label: 'Multiplicar A × B',
-    example: 'Ancho × Alto → área',
-    description: 'Multiplica dos columnas del item.',
-    left: 'column',
-    right: 'column',
-    leftLabel: 'Columna A',
-    rightLabel: 'Columna B',
-  },
-  {
-    op: 'add',
-    label: 'Sumar A + B',
-    example: 'Precio + matrícula → costo total',
-    description: 'Suma dos columnas del item.',
-    left: 'column',
-    right: 'column',
-    leftLabel: 'Columna A',
-    rightLabel: 'Columna B',
-  },
-  {
-    op: 'sub',
-    label: 'Restar A − B',
-    example: 'Precio − descuento → neto',
-    description: 'Resta la columna B de la columna A.',
-    left: 'column',
-    right: 'column',
-    leftLabel: 'Columna A',
-    rightLabel: 'Columna B (resta)',
-  },
-  {
-    op: 'pct',
-    label: 'Porcentaje (A ÷ B) × 100',
-    example: 'Usado ÷ Total → % uso',
-    description: 'Divide A entre B y multiplica por 100.',
-    left: 'column',
-    right: 'column',
-    leftLabel: 'Columna A',
-    rightLabel: 'Columna B',
-  },
-  {
-    op: 'globalDivCol',
-    label: 'Variable global ÷ columna',
-    example: 'Precio galón ÷ km/galón → precio por km',
-    description: 'Divide una variable global de la lista entre una columna del item.',
-    left: 'global',
-    right: 'column',
-    leftLabel: 'Variable global',
-    rightLabel: 'Columna del item',
-  },
-  {
-    op: 'colMulGlobal',
-    label: 'Columna × variable global',
-    example: 'Precio/km × km viaje → costo del viaje',
-    description: 'Multiplica una columna del item por una variable/parámetro global.',
-    left: 'column',
-    right: 'global',
-    leftLabel: 'Columna del item',
-    rightLabel: 'Variable global',
-  },
+type OpShape = Pick<CalcOpMeta, 'op' | 'left' | 'right'>;
+type OpText = Omit<CalcOpMeta, 'op' | 'left' | 'right'>;
+
+const SHAPES: OpShape[] = [
+  { op: 'div', left: 'column', right: 'column' },
+  { op: 'mul', left: 'column', right: 'column' },
+  { op: 'add', left: 'column', right: 'column' },
+  { op: 'sub', left: 'column', right: 'column' },
+  { op: 'pct', left: 'column', right: 'column' },
+  { op: 'globalDivCol', left: 'global', right: 'column' },
+  { op: 'colMulGlobal', left: 'column', right: 'global' },
 ];
 
-export function getCalcOpMeta(op: CalcOp): CalcOpMeta {
-  const found = CALC_OPS.find((item) => item.op === op);
+const TEXT: Record<Locale, Record<CalcOp, OpText>> = {
+  es: {
+    div: {
+      label: 'Dividir A ÷ B',
+      example: 'Precio ÷ Puestos → precio por pasajero',
+      description: 'Divide el dato A entre el dato B.',
+      leftLabel: 'Dato A',
+      rightLabel: 'Dato B (divide a A)',
+    },
+    mul: {
+      label: 'Multiplicar A × B',
+      example: 'Ancho × Alto → área',
+      description: 'Multiplica dos datos de la opción.',
+      leftLabel: 'Dato A',
+      rightLabel: 'Dato B',
+    },
+    add: {
+      label: 'Sumar A + B',
+      example: 'Precio + matrícula → costo total',
+      description: 'Suma dos datos de la opción.',
+      leftLabel: 'Dato A',
+      rightLabel: 'Dato B',
+    },
+    sub: {
+      label: 'Restar A − B',
+      example: 'Precio − descuento → neto',
+      description: 'Le resta el dato B al dato A.',
+      leftLabel: 'Dato A',
+      rightLabel: 'Dato B (se resta)',
+    },
+    pct: {
+      label: 'Porcentaje (A ÷ B) × 100',
+      example: 'Usado ÷ Total → % de uso',
+      description: 'Divide A entre B y multiplica por 100.',
+      leftLabel: 'Dato A',
+      rightLabel: 'Dato B',
+    },
+    globalDivCol: {
+      label: 'Dato fijo ÷ dato',
+      example: 'Precio del galón ÷ km por galón → precio por km',
+      description: 'Divide un dato fijo de la lista entre un dato de la opción.',
+      leftLabel: 'Dato fijo',
+      rightLabel: 'Dato de la opción',
+    },
+    colMulGlobal: {
+      label: 'Dato × dato fijo',
+      example: 'Precio por km × km del viaje → costo del viaje',
+      description: 'Multiplica un dato de la opción por un dato fijo de la lista.',
+      leftLabel: 'Dato de la opción',
+      rightLabel: 'Dato fijo',
+    },
+  },
+  en: {
+    div: {
+      label: 'Divide A ÷ B',
+      example: 'Price ÷ Seats → price per passenger',
+      description: 'Divides value A by value B.',
+      leftLabel: 'Value A',
+      rightLabel: 'Value B (divides A)',
+    },
+    mul: {
+      label: 'Multiply A × B',
+      example: 'Width × Height → area',
+      description: 'Multiplies two values of the option.',
+      leftLabel: 'Value A',
+      rightLabel: 'Value B',
+    },
+    add: {
+      label: 'Add A + B',
+      example: 'Price + registration → total cost',
+      description: 'Adds two values of the option.',
+      leftLabel: 'Value A',
+      rightLabel: 'Value B',
+    },
+    sub: {
+      label: 'Subtract A − B',
+      example: 'Price − discount → net',
+      description: 'Subtracts value B from value A.',
+      leftLabel: 'Value A',
+      rightLabel: 'Value B (subtracted)',
+    },
+    pct: {
+      label: 'Percentage (A ÷ B) × 100',
+      example: 'Used ÷ Total → % used',
+      description: 'Divides A by B and multiplies by 100.',
+      leftLabel: 'Value A',
+      rightLabel: 'Value B',
+    },
+    globalDivCol: {
+      label: 'Fixed value ÷ value',
+      example: 'Gas price per gallon ÷ km per gallon → price per km',
+      description: 'Divides a fixed value of the list by a value of the option.',
+      leftLabel: 'Fixed value',
+      rightLabel: 'Option value',
+    },
+    colMulGlobal: {
+      label: 'Value × fixed value',
+      example: 'Price per km × trip km → trip cost',
+      description: 'Multiplies a value of the option by a fixed value of the list.',
+      leftLabel: 'Option value',
+      rightLabel: 'Fixed value',
+    },
+  },
+};
+
+/** Operaciones predefinidas (sin editor de fórmulas, por decisión de producto) en el idioma dado. */
+export function getCalcOps(locale: Locale = 'es'): CalcOpMeta[] {
+  return SHAPES.map((shape) => ({ ...shape, ...TEXT[locale][shape.op] }));
+}
+
+/** @deprecated Usa `getCalcOps(locale)`. Se mantiene en español por compatibilidad. */
+export const CALC_OPS: CalcOpMeta[] = getCalcOps('es');
+
+export function getCalcOpMeta(op: CalcOp, locale: Locale = 'es'): CalcOpMeta {
+  const found = getCalcOps(locale).find((item) => item.op === op);
   if (!found) {
     throw new Error(`Unknown calc op: ${op}`);
   }

@@ -6,3 +6,6 @@ export * from './bulk-import';
 export * from './column-help';
 export * from './rank-preview';
 export * from './import-plan';
+export * from './decimal-input';
+export * from './ranking-explain';
+export * from './locale';

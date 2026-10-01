@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { TextInput } from '@/components/ui/text-input';
 import { useTheme } from '@/hooks/use-theme';
+import { useI18n } from '@/i18n';
 
 type Props = {
   value: string;
@@ -15,6 +16,7 @@ type Props = {
 
 export function ImageFieldInput({ value, onChange }: Props) {
   const theme = useTheme();
+  const { t } = useI18n();
   const [loadFailed, setLoadFailed] = useState(false);
   const uri = value.trim();
   const showPreview = uri.length > 0;
@@ -22,7 +24,7 @@ export function ImageFieldInput({ value, onChange }: Props) {
   async function pickLocal() {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert('Permiso requerido', 'Necesitamos acceso a la galería para adjuntar una imagen.');
+      Alert.alert(t.image.permissionTitle, t.image.permissionBody);
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -37,13 +39,28 @@ export function ImageFieldInput({ value, onChange }: Props) {
 
   return (
     <View style={{ gap: theme.spacing[2] }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing[2] }}>
+        <Button title={t.image.attach} size="sm" variant="secondary" onPress={() => void pickLocal()} />
+        {showPreview ? (
+          <Button
+            title={t.image.remove}
+            size="sm"
+            variant="ghost"
+            onPress={() => {
+              setLoadFailed(false);
+              onChange('');
+            }}
+          />
+        ) : null}
+      </View>
       <TextInput
         value={value}
         onChangeText={(text) => {
           setLoadFailed(false);
           onChange(text);
         }}
-        placeholder="https://… o URI local"
+        placeholder={t.image.linkPlaceholder}
+        accessibilityLabel={t.image.linkLabel}
         autoCapitalize="none"
         autoCorrect={false}
       />
@@ -64,36 +81,13 @@ export function ImageFieldInput({ value, onChange }: Props) {
         >
           {loadFailed ? (
             <Text variant="caption" colorKey="textSecondary">
-              No se pudo cargar la imagen
+              {t.image.loadFailed}
             </Text>
           ) : (
-            <Image
-              source={{ uri }}
-              style={{ width: '100%', height: '100%' }}
-              contentFit="cover"
-              onError={() => setLoadFailed(true)}
-            />
+            <Image source={{ uri }} style={{ width: '100%', height: '100%' }} contentFit="cover" onError={() => setLoadFailed(true)} />
           )}
         </View>
       ) : null}
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing[2] }}>
-        <Button
-          title="Adjuntar imagen"
-          size="sm"
-          pill
-          variant="secondary"
-          onPress={() => void pickLocal()}
-        />
-        <Button
-          title="Limpiar"
-          size="sm"
-          variant="ghost"
-          onPress={() => {
-            setLoadFailed(false);
-            onChange('');
-          }}
-        />
-      </View>
     </View>
   );
 }

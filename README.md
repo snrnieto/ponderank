@@ -1,4 +1,4 @@
-# Item Ranking
+# Ponderank
 
 App Expo (web + móvil) para comparar productos en listas configurables con ranking automático.
 
@@ -98,13 +98,11 @@ Sin EAS: abre `android/` en Android Studio y `ios/` en Xcode para firmar y subir
 
 ## Demo seed
 
-Por defecto, si el storage está vacío, se carga la lista **Vehículos usados** (datos de `Comparativa compras.xlsx`).
-
-Para desactivar (productivo / storage limpio):
+Por defecto los usuarios nuevos empiezan sin listas. Para cargar la lista demo **Vehículos usados** (datos de `Comparativa compras.xlsx`) cuando el storage está vacío, por ejemplo en desarrollo:
 
 ```bash
 # .env
-EXPO_PUBLIC_ENABLE_DEMO_SEED=false
+EXPO_PUBLIC_ENABLE_DEMO_SEED=true
 ```
 
 O elimina `src/data/demo-vehicles-seed.ts` y la llamada en el repositorio.

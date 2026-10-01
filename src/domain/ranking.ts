@@ -139,3 +139,19 @@ export function canSaveSchema(columns: ListColumn[]): {
   }
   return assertWeightsSumTo100(weights);
 }
+
+/**
+ * Reparte las importancias para que sumen exactamente 100, manteniendo las proporciones.
+ * Si todas están en 0, las reparte en partes iguales. Redondea a 1 decimal y corrige el
+ * sobrante en el criterio más importante.
+ */
+export function normalizeWeights<T extends { weight: number }>(entries: T[]): T[] {
+  if (entries.length === 0) return entries;
+  const sum = entries.reduce((acc, e) => acc + Math.max(0, e.weight), 0);
+  const raw = entries.map((e) => (sum > 0 ? (Math.max(0, e.weight) / sum) * 100 : 100 / entries.length));
+  const rounded = raw.map((w) => Math.round(w * 10) / 10);
+  const diff = Math.round((100 - rounded.reduce((a, b) => a + b, 0)) * 10) / 10;
+  const largest = rounded.indexOf(Math.max(...rounded));
+  rounded[largest] = Math.round((rounded[largest] + diff) * 10) / 10;
+  return entries.map((e, i) => ({ ...e, weight: rounded[i] }));
+}

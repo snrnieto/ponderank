@@ -1,0 +1,387 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-01T17:23:33.367Z",
+  "title": "Design System: Ponderank",
+  "extensions": {
+    "colorMeta": {
+      "cobalt-enamel": {
+        "role": "primary",
+        "displayName": "Cobalto Esmaltado",
+        "canonical": "#2B3FD6",
+        "tonalRamp": [
+          "#0C1240",
+          "#162173",
+          "#2030A7",
+          "#2E41D7",
+          "#6170E0",
+          "#949EEA",
+          "#C3C9F3",
+          "#EAECFB"
+        ]
+      },
+      "cobalt-deep": {
+        "role": "primary",
+        "displayName": "Cobalto Hondo",
+        "canonical": "#1F2FA8",
+        "tonalRamp": [
+          "#0C1241",
+          "#152174",
+          "#1F2FA8",
+          "#2C40D8",
+          "#606FE2",
+          "#939EEB",
+          "#C3C8F4",
+          "#E9ECFB"
+        ]
+      },
+      "brass": {
+        "role": "secondary",
+        "displayName": "Bronce de Pesa",
+        "canonical": "#C8962E",
+        "tonalRamp": [
+          "#3E2F0E",
+          "#70541A",
+          "#A27925",
+          "#D09D34",
+          "#DCB566",
+          "#E7CD97",
+          "#F2E3C5",
+          "#FAF5EA"
+        ]
+      },
+      "brass-light": {
+        "role": "secondary",
+        "displayName": "Bronce Pulido",
+        "canonical": "#E2B85A",
+        "tonalRamp": [
+          "#41310B",
+          "#755715",
+          "#A97E1E",
+          "#DAA42A",
+          "#E3BA5F",
+          "#ECD093",
+          "#F4E5C2",
+          "#FBF6E9"
+        ]
+      },
+      "brass-deep": {
+        "role": "secondary",
+        "displayName": "Bronce Viejo",
+        "canonical": "#8E6516",
+        "tonalRamp": [
+          "#422F0A",
+          "#775512",
+          "#AC7A1B",
+          "#DD9F27",
+          "#E6B75C",
+          "#EECE91",
+          "#F5E4C1",
+          "#FCF5E9"
+        ]
+      },
+      "needle-red": {
+        "role": "tertiary",
+        "displayName": "Rojo de Aguja",
+        "canonical": "#E5372A",
+        "tonalRamp": [
+          "#440C08",
+          "#7B160F",
+          "#B12016",
+          "#E42E20",
+          "#EA6157",
+          "#F1948D",
+          "#F7C3BF",
+          "#FCEAE8"
+        ]
+      },
+      "enamel-white": {
+        "role": "neutral",
+        "displayName": "Blanco Esmalte",
+        "canonical": "#FFFFFF",
+        "tonalRamp": [
+          "#262626",
+          "#454545",
+          "#636363",
+          "#828282",
+          "#A1A1A1",
+          "#BFBFBF",
+          "#DBDBDB",
+          "#F2F2F2"
+        ]
+      },
+      "enamel-mist": {
+        "role": "neutral",
+        "displayName": "Niebla Cobalto",
+        "canonical": "#C9D0FF",
+        "tonalRamp": [
+          "#000A4D",
+          "#00128A",
+          "#001AC7",
+          "#0525FF",
+          "#425BFF",
+          "#8090FF",
+          "#B8C1FF",
+          "#E5E9FF"
+        ]
+      },
+      "dial-white": {
+        "role": "neutral",
+        "displayName": "Blanco Esfera",
+        "canonical": "#F6F7FB",
+        "tonalRamp": [
+          "#181D35",
+          "#2A355F",
+          "#3D4D8A",
+          "#5265B2",
+          "#7C8BC5",
+          "#A7B1D8",
+          "#CED3E9",
+          "#EDEFF7"
+        ]
+      },
+      "dial-line": {
+        "role": "neutral",
+        "displayName": "Línea de Esfera",
+        "canonical": "#D8DBEA",
+        "tonalRamp": [
+          "#1B1F32",
+          "#30375A",
+          "#465081",
+          "#5D69A8",
+          "#848EBD",
+          "#ACB3D2",
+          "#D1D4E6",
+          "#EEF0F6"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Tinta",
+        "canonical": "#14162B",
+        "tonalRamp": [
+          "#181B34",
+          "#2C305E",
+          "#3F4588",
+          "#545CB0",
+          "#7E84C3",
+          "#A8ACD7",
+          "#CED1E8",
+          "#EEEEF7"
+        ]
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "Tinta Suave",
+        "canonical": "#4A4E6B",
+        "tonalRamp": [
+          "#1F212D",
+          "#383B51",
+          "#515676",
+          "#6B7199",
+          "#8F94B2",
+          "#B4B6CB",
+          "#D5D6E2",
+          "#F0F0F5"
+        ]
+      },
+      "logo-violet": {
+        "role": "brand",
+        "displayName": "Violeta de Logo",
+        "canonical": "#6C56FB",
+        "tonalRamp": [
+          "#0B024B",
+          "#150387",
+          "#1E05C2",
+          "#2B0BF9",
+          "#5F47FB",
+          "#9382FC",
+          "#C2B9FD",
+          "#E9E6FE"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Titular de primera vista y de cierre, uno por banda cobalto (42px bajo 960px: display-compact)."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Título de sección sobre blanco esfera (30px bajo 960px: headline-compact)."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Marca en cabecera y nombre de opción en el tique."
+      },
+      "lead": {
+        "displayName": "Lead",
+        "purpose": "Párrafos explicativos y pasos, 460–540px de ancho."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Instrucciones cortas dentro del instrumento."
+      },
+      "small": {
+        "displayName": "Small",
+        "purpose": "Aclaraciones, encabezados de columna, pie."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Nombres de opciones y de lo que importa; enlaces."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Texto del botón bronce."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "Cifras de tabla en numerales tabulares."
+      },
+      "verdict": {
+        "displayName": "Verdict",
+        "purpose": "Nota del ganador, siempre en rojo de aguja."
+      },
+      "numeral": {
+        "displayName": "Numeral",
+        "purpose": "Números de paso en bronce viejo."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "needle-sweep",
+        "value": "900ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Giro de la aguja (Easing.out(Easing.exp)) al cambiar el ganador y una vez al cargar; con movimiento reducido salta directo."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact",
+        "value": "480px"
+      },
+      {
+        "name": "wide",
+        "value": "960px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "CTA de bronce macizo, uno por banda.",
+      "html": "<button class=\"ds-btn-primary\">Empezar a comparar</button>",
+      "css": ".ds-btn-primary{background:#C8962E;color:#14162B;font-family:'Bricolage Grotesque',system-ui,sans-serif;font-weight:700;font-size:18px;line-height:1.2;padding:16px 26px;border:none;border-radius:14px;cursor:pointer;transition:background .15s}.ds-btn-primary:hover{background:#E2B85A}.ds-btn-primary:active{background:#8E6516}.ds-btn-primary:focus-visible{outline:3px solid #14162B;outline-offset:3px}"
+    },
+    {
+      "name": "Link on Enamel",
+      "kind": "nav",
+      "refersTo": "link-on-enamel",
+      "description": "Enlace secundario subrayado sobre cobalto (cabecera).",
+      "html": "<div class=\"ds-enamel\"><span class=\"ds-brand\">Ponderank</span><a class=\"ds-link\" href=\"#\">Abrir la app</a></div>",
+      "css": ".ds-enamel{background:#2B3FD6;padding:20px;display:flex;justify-content:space-between;align-items:center}.ds-brand{color:#FFFFFF;font-family:'Bricolage Grotesque',system-ui,sans-serif;font-weight:700;font-size:20px}.ds-link{color:#FFFFFF;font-family:'Bricolage Grotesque',system-ui,sans-serif;font-weight:700;font-size:16px;text-decoration:underline;text-decoration-color:#C9D0FF}.ds-link:hover{text-decoration-color:#E2B85A}.ds-link:focus-visible{outline:2px solid #FFFFFF;outline-offset:3px}"
+    },
+    {
+      "name": "Weight Buttons",
+      "kind": "button",
+      "refersTo": "weight-button",
+      "description": "Par quitar/poner pesa: círculos bronce de 34px.",
+      "html": "<div class=\"ds-wb-row\"><button class=\"ds-wb\" aria-label=\"Darle menos importancia a Precio\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\"><path d=\"M5 12h14\" stroke=\"#14162B\" stroke-width=\"3\" stroke-linecap=\"round\"/></svg></button><button class=\"ds-wb\" aria-label=\"Darle más importancia a Precio\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\"><path d=\"M12 5v14M5 12h14\" stroke=\"#14162B\" stroke-width=\"3\" stroke-linecap=\"round\"/></svg></button></div>",
+      "css": ".ds-wb-row{display:flex;gap:10px;background:#2B3FD6;padding:16px}.ds-wb{width:34px;height:34px;border-radius:50%;border:none;background:#C8962E;display:flex;align-items:center;justify-content:center;cursor:pointer}.ds-wb:hover{background:#E2B85A}.ds-wb:active{background:#8E6516}.ds-wb:disabled{opacity:.35}.ds-wb:focus-visible{outline:2px solid #FFFFFF;outline-offset:3px}"
+    },
+    {
+      "name": "Verdict Window",
+      "kind": "custom",
+      "refersTo": "verdict-window",
+      "description": "Ventanilla bajo la esfera con el ganador y su nota en rojo de aguja.",
+      "html": "<div class=\"ds-vw-case\"><div class=\"ds-vw\"><span class=\"ds-vw-label\">Te conviene Nova A15</span><span class=\"ds-vw-score\">75/100</span></div></div>",
+      "css": ".ds-vw-case{background:#1F2FA8;padding:14px 18px;border-radius:0 0 14px 14px;display:flex;justify-content:center;max-width:300px}.ds-vw{background:#F6F7FB;border-radius:8px;padding:8px 16px;display:flex;flex-wrap:wrap;gap:0 10px;align-items:baseline;justify-content:center}.ds-vw-label{font-family:'Bricolage Grotesque',system-ui,sans-serif;font-weight:700;font-size:16px;color:#14162B}.ds-vw-score{font-family:'Bricolage Grotesque',system-ui,sans-serif;font-weight:800;font-size:20px;color:#E5372A;font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Reading Plate",
+      "kind": "card",
+      "refersTo": "reading-plate",
+      "description": "Lectura ordenada de las opciones; solo la nota del ganador en rojo.",
+      "html": "<div class=\"ds-rp\"><div class=\"ds-rp-row\"><span class=\"ds-rp-n\">1.</span><span class=\"ds-rp-name\">Nova A15</span><span class=\"ds-rp-win\">75</span></div><div class=\"ds-rp-row\"><span class=\"ds-rp-n\">2.</span><span class=\"ds-rp-name\">Pulse 8 Pro</span><span class=\"ds-rp-fig\">71,7</span></div><div class=\"ds-rp-row\"><span class=\"ds-rp-n\">3.</span><span class=\"ds-rp-name\">Zenit Ultra</span><span class=\"ds-rp-fig\">53,5</span></div></div>",
+      "css": ".ds-rp{background:#F6F7FB;border-radius:10px;padding:4px 16px;font-family:'Bricolage Grotesque',system-ui,sans-serif;max-width:520px}.ds-rp-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-top:1px solid #D8DBEA}.ds-rp-row:first-child{border-top:none}.ds-rp-n{width:22px;color:#4A4E6B;font-weight:700;font-variant-numeric:tabular-nums}.ds-rp-name{flex:1;color:#14162B;font-weight:700}.ds-rp-fig{color:#14162B;font-weight:700;font-variant-numeric:tabular-nums}.ds-rp-win{color:#E5372A;font-weight:800;font-size:20px;font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Weigh Ticket",
+      "kind": "card",
+      "refersTo": "weigh-ticket",
+      "description": "Tique de báscula: desglose de la nota del ganador.",
+      "html": "<div class=\"ds-wt\"><div class=\"ds-wt-title\">Nova A15</div><div class=\"ds-wt-head\"><span>Qué te importa</span><span>Dato</span><span>Nota</span><span>Importancia</span><span>Suma</span></div><div class=\"ds-wt-row\"><span>Precio</span><span>$899.000</span><span>100</span><span>× 50%</span><span>50</span></div><div class=\"ds-wt-row\"><span>Batería</span><span>20 h</span><span>62,5</span><span>× 33%</span><span>20,8</span></div><div class=\"ds-wt-total\"><span>Nota final</span><span class=\"ds-wt-v\">75 de 100</span></div></div>",
+      "css": ".ds-wt{background:#F6F7FB;border-radius:4px;border-top:2px dashed #4A4E6B;border-bottom:2px dashed #4A4E6B;padding:20px 22px;max-width:540px;color:#14162B;font-family:'Bricolage Grotesque',system-ui,sans-serif}.ds-wt-title{font-weight:700;font-size:20px;margin-bottom:10px}.ds-wt-head,.ds-wt-row{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr}.ds-wt-head{font-family:'Atkinson Hyperlegible',system-ui,sans-serif;font-size:13px;color:#4A4E6B;padding-bottom:6px;border-bottom:1px solid #D8DBEA}.ds-wt-head span:not(:first-child),.ds-wt-row span:not(:first-child){text-align:right}.ds-wt-row{padding:6px 0;font-weight:700;font-variant-numeric:tabular-nums}.ds-wt-total{display:flex;justify-content:space-between;align-items:baseline;margin-top:6px;padding-top:10px;border-top:2px solid #14162B;font-weight:700}.ds-wt-v{color:#E5372A;font-weight:800;font-size:20px;font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Weight Stack",
+      "kind": "custom",
+      "refersTo": "weight-button",
+      "description": "Pesas de bronce apiladas de mayor a menor sobre la barra común.",
+      "html": "<div class=\"ds-ws\"><div class=\"ds-ws-cols\"><div class=\"ds-ws-col\"><i style=\"width:46px\"></i><i style=\"width:52px\"></i><i style=\"width:58px\"></i></div><div class=\"ds-ws-col\"><i style=\"width:52px\"></i><i style=\"width:58px\"></i></div><div class=\"ds-ws-col\"><i style=\"width:58px\"></i></div></div><div class=\"ds-ws-bar\"></div><div class=\"ds-ws-labels\"><span>Precio · 50%</span><span>Batería · 33%</span><span>Memoria · 17%</span></div></div>",
+      "css": ".ds-ws{background:#2B3FD6;padding:20px;max-width:520px}.ds-ws-cols{display:flex;height:65px}.ds-ws-col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px}.ds-ws-col i{display:block;height:10px;border-radius:5px;background:#C8962E}.ds-ws-bar{height:6px;border-radius:3px;background:#C8962E;margin:12px 8px}.ds-ws-labels{display:flex}.ds-ws-labels span{flex:1;text-align:center;color:#FFFFFF;font-family:'Bricolage Grotesque',system-ui,sans-serif;font-weight:700;font-size:16px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Balanza de plaza",
+    "overview": "Ponderar es pesar. Ponderank se ve como la balanza de un mercado de plaza: hierro esmaltado azul cobalto como campo dominante, una esfera de reloj blanca fría con numerales en tinta, pesas cilíndricas de bronce apiladas como discos, y una aguja roja que solo existe para señalar al ganador. La persona no mira una gráfica: opera un instrumento. Pone y quita pesas sobre lo que le importa y la aguja gira hacia la opción que le conviene.\n\nEl sistema es plano, macizo y legible. No hay degradados, ni brillos, ni sombras: la profundidad viene de capas de material (esmalte cobalto, esmalte más oscuro, placa blanca encima) y de bordes de bronce. La tipografía habla en dos registros: Bricolage Grotesque, ancha y apretada, da la voz y los números; Atkinson Hyperlegible se encarga de todo lo que se lee de corrido. Las cifras siempre van en numerales tabulares para que las columnas de puntaje se alineen como en un tique de báscula.\n\nSe rechaza explícitamente el hero SaaS con degradado violeta a azul, la captura flotante y la fila de tarjetas iguales. La voz es de comprador, no de analista: «qué te importa», «importancia», «nota», «suma»; nunca «criterio», «peso» ni «ranking ponderado» en el texto visible.\n\n**Estado de adopción.** Este mundo nació en la landing pública (`src/app/index.tsx`, tokens en `tokens.landing`) y es el sistema visual de referencia de todo el producto. Las pantallas de la app (`src/app/list/**`, tokens `colors` / `gradients` / `elevation`) todavía usan el tema anterior violeta → azul con sombras teñidas y están pendientes de migración a este sistema. Hasta que migren, ese tema es deuda, no una segunda referencia.",
+    "keyCharacteristics": [
+      "Campo cobalto a sangre en las bandas de apertura y cierre; placas blanco esfera encima para todo lo que se lee como dato.",
+      "Bronce para lo que se toca: el botón principal, los botones de pesa y las pesas mismas.",
+      "Rojo de aguja exclusivamente para el veredicto: la aguja y la nota del ganador.",
+      "Plano: sin sombras, sin degradados; capas tonales y bordes de material.",
+      "Numerales tabulares Bricolage en toda cifra comparable.",
+      "Lenguaje de comprador en español, tuteando."
+    ],
+    "rules": [
+      {
+        "name": "The Needle Rule",
+        "body": "El rojo de aguja señala al ganador y a nada más. Nunca errores, nunca alertas, nunca decoración, nunca un segundo elemento en la misma vista que no sea el veredicto. Los errores de la app usan otro rojo distinto.",
+        "section": "colors"
+      },
+      {
+        "name": "The Brass Touch Rule",
+        "body": "El bronce significa «esto se puede tocar o pesar». Un bloque de bronce que no se acciona ni representa una pesa miente sobre la interfaz.",
+        "section": "colors"
+      },
+      {
+        "name": "The Logo-Only Violet Rule",
+        "body": "El violeta pertenece al logo. Ni botones, ni fondos, ni degradados violeta → azul: ese es exactamente el tema que este sistema reemplaza.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Figures Rule",
+        "body": "Toda cifra que se compara con otra (notas, porcentajes, precios, sumas) va en Bricolage con numerales tabulares y alineada a la derecha. Formato es-CO, máximo un decimal.",
+        "section": "typography"
+      },
+      {
+        "name": "The Buyer Voice Rule",
+        "body": "El texto visible dice «qué te importa», «importancia», «nota», «suma», «te conviene». Nunca «criterio», «peso», «score» ni «ranking ponderado». Si una frase necesita explicar la metáfora, la frase está mal.",
+        "section": "typography"
+      },
+      {
+        "name": "The Enamel Layer Rule",
+        "body": "Para separar un plano de otro se cambia de material (cobalto → cobalto hondo → blanco esfera), nunca se agrega sombra.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do usar cobalto esmaltado como campo de las bandas de apertura y cierre, y como primario de la interfaz en las pantallas de trabajo.",
+      "Do reservar el bronce para lo que se acciona o se pesa: CTA, botones + / −, pesas.",
+      "Do mostrar toda cifra comparable en Bricolage con numerales tabulares, alineada a la derecha, formato es-CO.",
+      "Do separar planos cambiando de material (cobalto, cobalto hondo, blanco esfera) y abrir secciones con una regla de tinta de 2px.",
+      "Do escribir en lenguaje de comprador: «qué te importa», «importancia», «nota», «suma», «te conviene».",
+      "Do respetar el movimiento reducido: la aguja salta en lugar de girar.",
+      "Do asegurar que el indicador de foco alcance 3:1 contra el fondo donde aparece, tanto sobre cobalto como sobre blanco esfera."
+    ],
+    "donts": [
+      "Don't usar el rojo de aguja para errores, alertas, badges ni decoración; es el veredicto y nada más.",
+      "Don't usar el violeta del logo fuera del logo, ni volver al degradado violeta → azul.",
+      "Don't agregar sombras ni brillos a placas o botones; el sistema es plano.",
+      "Don't construir un hero SaaS con degradado, captura flotante y fila de tarjetas iguales.",
+      "Don't escribir «criterio», «peso», «score» ni «ranking ponderado» en el texto visible.",
+      "Don't pintar de bronce algo que no se puede tocar ni pesar."
+    ]
+  }
+}

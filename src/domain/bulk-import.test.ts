@@ -93,7 +93,7 @@ describe('parseImportText', () => {
     const result = parseImportText('[{"Nombre":"A","Precio/km":3,"Color":"rojo"}]', columns);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.rows[0].warnings).toEqual(['"Precio" vacío → aportará 0% al ranking']);
+    expect(result.rows[0].warnings).toEqual(['"Precio" está vacío: esta opción sacará 0 en ese dato']);
     expect(result.warnings).toHaveLength(2);
   });
 
@@ -112,6 +112,24 @@ describe('parseImportText', () => {
 
   it('rejects rows with no known data', () => {
     const result = parseImportText('[{"Otra":1}]', columns);
-    expect(result.ok && result.rows[0].errors).toEqual(['No tiene ningún dato de las columnas de la lista']);
+    expect(result.ok && result.rows[0].errors).toEqual(['No tiene ningún dato de esta lista']);
+  });
+
+  it('reads a table pasted from a spreadsheet (tabs, semicolons or commas)', () => {
+    const tsv = 'Nombre\tPrecio\tTipo\nAuto A\t98.000.000\tEléctrico\nAuto B\t$ 69,990,000\tHíbrido';
+    const result = parseImportText(tsv, columns);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.rows.map((r) => r.values.price)).toEqual([98000000, 69990000]);
+    expect(result.rows.every((r) => r.errors.length === 0)).toBe(true);
+
+    const csv = parseImportText('Nombre;Precio\n"Auto; C";10', columns);
+    expect(csv.ok && csv.rows[0].values).toMatchObject({ name: 'Auto; C', price: 10 });
+  });
+
+  it('speaks English when asked', () => {
+    const result = parseImportText('', columns, 'en');
+    expect(!result.ok && result.error).toContain('Paste the AI reply');
+    expect(buildImportTemplate('Cars', columns, () => 0, 'en')).toContain('"Precio": number');
   });
 });

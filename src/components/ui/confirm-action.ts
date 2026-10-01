@@ -8,7 +8,7 @@ export function confirmAction(
   title: string,
   message: string,
   onConfirm: () => void,
-  confirmLabel = 'Eliminar',
+  labels: { confirm: string; cancel: string },
 ) {
   if (Platform.OS === 'web') {
     const ok =
@@ -19,7 +19,7 @@ export function confirmAction(
     return;
   }
   Alert.alert(title, message, [
-    { text: 'Cancelar', style: 'cancel' },
-    { text: confirmLabel, style: 'destructive', onPress: onConfirm },
+    { text: labels.cancel, style: 'cancel' },
+    { text: labels.confirm, style: 'destructive', onPress: onConfirm },
   ]);
 }

@@ -41,7 +41,7 @@ export function Checkbox({ checked, indeterminate = false, onChange, accessibili
           }
           size={14}
           weight="bold"
-          tintColor={theme.colors.textInverse}
+          tintColor={theme.colors.onPrimary}
         />
       ) : null}
     </Pressable>

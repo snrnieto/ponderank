@@ -1,15 +1,10 @@
-/**
- * Learn more about light and dark modes:
- * https://docs.expo.dev/guides/color-schemes/
- */
+import { useAppearance } from '@/state/appearance';
+import { getTheme, type AppTheme } from '@/theme';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { getTheme, type AppTheme, type ColorSchemeName } from '@/theme';
-
+/** Tema activo según la preferencia del usuario (oscuro por defecto, ver `state/appearance`). */
 export function useTheme(): AppTheme {
-  const scheme = useColorScheme();
-  const resolved: ColorSchemeName = scheme === 'dark' ? 'dark' : 'light';
-  return getTheme(resolved);
+  const { scheme } = useAppearance();
+  return getTheme(scheme);
 }
 
 /** Active color palette only (compat with older Themed* components). */

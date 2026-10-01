@@ -234,6 +234,7 @@ export function buildDemoVehiclesBundle(): ComparisonListBundle {
   };
 }
 
+/** La lista demo solo se carga si se activa explícitamente (útil en desarrollo). */
 export function isDemoSeedEnabled(): boolean {
-  return process.env.EXPO_PUBLIC_ENABLE_DEMO_SEED !== 'false';
+  return process.env.EXPO_PUBLIC_ENABLE_DEMO_SEED === 'true';
 }

@@ -1,22 +1,23 @@
-import {
-  Platform,
-  Pressable,
-  StyleSheet,
-  type PressableProps,
-  type StyleProp,
-  type ViewStyle,
-} from 'react-native';
+import { Pressable, StyleSheet, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
 
 import { Text } from '@/components/ui/text';
 import { useTheme } from '@/hooks/use-theme';
 
-type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';
+/**
+ * - `primary`: acción normal destacada (cobalto).
+ * - `accent`: la acción principal de la pantalla (bronce). Una por pantalla.
+ * - `secondary`: acción de apoyo o chip sin seleccionar.
+ * - `ghost`: acción terciaria (Cancelar, Volver).
+ * - `danger`: acción destructiva, en tono discreto.
+ */
+type ButtonVariant = 'primary' | 'accent' | 'secondary' | 'danger' | 'ghost';
 type ButtonSize = 'md' | 'sm';
 
 export type ButtonProps = PressableProps & {
   title: string;
   variant?: ButtonVariant;
   size?: ButtonSize;
+  /** Forma de píldora: solo para chips de selección/filtro, no para acciones. */
   pill?: boolean;
   style?: StyleProp<ViewStyle>;
 };
@@ -31,62 +32,40 @@ export function Button({
   ...rest
 }: ButtonProps) {
   const theme = useTheme();
-  const height =
-    size === 'sm' ? theme.components.buttonHeight - 8 : theme.components.buttonHeight;
-  const borderRadius = pill ? theme.radius.full : theme.radius.md;
-  const paddingHorizontal = theme.spacing[4];
-  const [from, to] = theme.gradients.brand;
-  const gradientCss = `linear-gradient(135deg, ${from}, ${to})`;
+  const { colors } = theme;
+  const height = size === 'sm' ? theme.components.touchTarget : theme.components.buttonHeight;
 
-  const textColor =
-    variant === 'primary' || variant === 'danger'
-      ? theme.colors.textInverse
-      : variant === 'ghost'
-        ? theme.colors.primary
-        : theme.colors.text;
-
-  const background =
-    variant === 'primary'
-      ? theme.colors.primary
-      : variant === 'danger'
-        ? theme.colors.danger
-        : variant === 'secondary'
-          ? theme.colors.secondaryMuted
-          : 'transparent';
-
-  const gradientStyle =
-    variant === 'primary'
-      ? Platform.select<ViewStyle>({
-          web: { backgroundImage: gradientCss },
-          default: { experimental_backgroundImage: gradientCss },
-        })
-      : undefined;
+  const palette: Record<ButtonVariant, { bg: string; bgPressed: string; fg: string; border?: string }> = {
+    primary: { bg: colors.primary, bgPressed: colors.primaryPressed, fg: colors.onPrimary },
+    accent: { bg: colors.accent, bgPressed: colors.accentPressed, fg: colors.onAccent },
+    secondary: { bg: colors.secondaryMuted, bgPressed: colors.border, fg: colors.secondary },
+    ghost: { bg: 'transparent', bgPressed: colors.surfaceMuted, fg: colors.primary, border: colors.border },
+    danger: { bg: colors.dangerSoft, bgPressed: colors.border, fg: colors.danger },
+  };
+  const tone = palette[variant];
 
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityState={{ disabled: !!disabled }}
       disabled={disabled}
       style={({ pressed }) => [
         styles.base,
         {
           height,
-          borderRadius,
-          backgroundColor: background,
-          borderWidth: variant === 'ghost' ? StyleSheet.hairlineWidth : 0,
-          borderColor: theme.colors.border,
-          opacity: disabled ? 0.5 : pressed ? 0.9 : 1,
-          paddingHorizontal,
+          minHeight: theme.components.touchTarget,
+          borderRadius: pill ? theme.radius.full : theme.radius.sm + 2,
+          backgroundColor: pressed ? tone.bgPressed : tone.bg,
+          borderWidth: tone.border ? 1 : 0,
+          borderColor: tone.border,
+          opacity: disabled ? 0.45 : 1,
+          paddingHorizontal: size === 'sm' ? theme.spacing[3] : theme.spacing[5],
         },
-        gradientStyle,
         style,
       ]}
       {...rest}
     >
-      <Text
-        variant="label"
-        color={variant === 'secondary' ? theme.colors.secondary : textColor}
-        style={styles.label}
-      >
+      <Text variant="label" color={tone.fg} style={styles.label}>
         {title}
       </Text>
     </Pressable>

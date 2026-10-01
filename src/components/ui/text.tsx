@@ -1,9 +1,9 @@
-import { Text as RNText, type TextProps as RNTextProps, type StyleProp, type TextStyle } from 'react-native';
+import { Platform, Text as RNText, type TextProps as RNTextProps, type StyleProp, type TextStyle } from 'react-native';
 
 import { useTheme } from '@/hooks/use-theme';
 import type { ThemeColorKey } from '@/theme';
 
-type TextVariant = 'body' | 'title' | 'subtitle' | 'caption' | 'label' | 'display' | 'overline';
+type TextVariant = 'body' | 'title' | 'subtitle' | 'caption' | 'label' | 'display' | 'overline' | 'figure';
 
 export type TextProps = RNTextProps & {
   variant?: TextVariant;
@@ -11,6 +11,9 @@ export type TextProps = RNTextProps & {
   colorKey?: ThemeColorKey;
   style?: StyleProp<TextStyle>;
 };
+
+/** Variantes que usan la fuente de display (Bricolage); el resto usa la de lectura (Atkinson). */
+const DISPLAY_VARIANTS: TextVariant[] = ['display', 'title', 'subtitle', 'label', 'overline', 'figure'];
 
 export function Text({
   variant = 'body',
@@ -21,29 +24,38 @@ export function Text({
   ...rest
 }: TextProps) {
   const theme = useTheme();
+  const { sizes, weights, lineHeights, fontFamily } = theme.typography;
+
   const size =
     variant === 'display'
-      ? theme.typography.sizes.display
+      ? sizes.display
       : variant === 'title'
-        ? theme.typography.sizes.title
+        ? sizes.title
         : variant === 'subtitle'
-          ? theme.typography.sizes.xl
+          ? sizes.xl
           : variant === 'caption' || variant === 'overline'
-            ? theme.typography.sizes.xs
+            ? sizes.xs
             : variant === 'label'
-              ? theme.typography.sizes.sm
-              : theme.typography.sizes.md;
+              ? sizes.sm
+              : sizes.md;
 
   const weight =
-    variant === 'display' || variant === 'title'
-      ? theme.typography.weights.bold
+    variant === 'display' || variant === 'title' || variant === 'figure'
+      ? weights.bold
       : variant === 'subtitle' || variant === 'label' || variant === 'overline'
-        ? theme.typography.weights.semibold
-        : theme.typography.weights.regular;
+        ? weights.semibold
+        : weights.regular;
 
   const resolvedColor =
-    color ??
-    (variant === 'overline' ? theme.colors.textSecondary : theme.colors[colorKey]);
+    color ?? (variant === 'overline' ? theme.colors.textSecondary : theme.colors[colorKey]);
+
+  // Las fuentes de marca se cargan por CSS en web; en nativo se usa la del sistema.
+  const family =
+    Platform.OS === 'web'
+      ? DISPLAY_VARIANTS.includes(variant)
+        ? fontFamily.display
+        : fontFamily.sans
+      : undefined;
 
   return (
     <RNText
@@ -52,11 +64,12 @@ export function Text({
         {
           color: resolvedColor,
           fontSize: size,
-          fontFamily: theme.typography.fontFamily.sans,
+          fontFamily: family,
           fontWeight: weight,
-          lineHeight: size * (variant === 'display' ? theme.typography.lineHeights.tight : theme.typography.lineHeights.normal),
-          letterSpacing: variant === 'overline' ? 1.2 : 0,
-          textTransform: variant === 'overline' ? 'uppercase' : 'none',
+          lineHeight:
+            size * (variant === 'display' || variant === 'title' ? lineHeights.tight : lineHeights.normal),
+          letterSpacing: variant === 'display' ? -0.6 : variant === 'title' ? -0.3 : 0,
+          fontVariant: variant === 'figure' ? ['tabular-nums'] : undefined,
         },
         style,
       ]}

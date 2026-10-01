@@ -29,6 +29,12 @@ describe('AsyncStorageListsRepository', () => {
     expect(bundles[0].items.length).toBe(10);
   });
 
+  it('does not seed by default', async () => {
+    delete process.env.EXPO_PUBLIC_ENABLE_DEMO_SEED;
+    const repo = createAsyncStorageListsRepository(memoryStorage());
+    expect(await repo.loadAll()).toHaveLength(0);
+  });
+
   it('does not seed when flag is false', async () => {
     process.env.EXPO_PUBLIC_ENABLE_DEMO_SEED = 'false';
     const storage = memoryStorage();

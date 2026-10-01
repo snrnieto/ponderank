@@ -7,6 +7,7 @@ import {
   type StoredPayload,
 } from './lists-repository';
 
+// Clave heredada del nombre anterior de la app; no cambiarla o los usuarios pierden sus listas.
 export const STORAGE_KEY = 'item-ranking:v1';
 
 export type MemoryStore = {

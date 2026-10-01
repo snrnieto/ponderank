@@ -3,6 +3,7 @@ import type { Href } from 'expo-router';
 import { Pressable } from 'react-native';
 
 import { useTheme } from '@/hooks/use-theme';
+import { useI18n } from '@/i18n';
 import { safeGoBack } from '@/navigation/safe-go-back';
 
 /**
@@ -11,13 +12,20 @@ import { safeGoBack } from '@/navigation/safe-go-back';
  */
 export function HeaderBackButton({ fallback }: { fallback: Href }) {
   const theme = useTheme();
+  const { t } = useI18n();
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel="Volver"
+      accessibilityLabel={t.common.back}
       hitSlop={theme.components.hitSlop}
       onPress={() => safeGoBack(fallback)}
-      style={{ paddingRight: theme.spacing[3] }}
+      style={{
+        minWidth: theme.components.touchTarget,
+        minHeight: theme.components.touchTarget,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: theme.spacing[1],
+      }}
     >
       <SymbolView
         name={{ ios: 'chevron.left', android: 'arrow_back', web: 'arrow_back' }}

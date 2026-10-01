@@ -4,6 +4,7 @@ import {
   assertWeightsSumTo100,
   computeItemScores,
   computeRanking,
+  normalizeWeights,
   resolveTargetValue,
   scoreCriterion,
 } from './ranking';
@@ -193,5 +194,18 @@ describe('computeItemScores helpers', () => {
     };
     const scores = computeItemScores(item, columns, [], { hp: 150 });
     expect(scores.partials.hp).toBeCloseTo(66.666, 2);
+  });
+});
+
+describe('normalizeWeights', () => {
+  it('scales proportionally to exactly 100', () => {
+    const out = normalizeWeights([{ id: 'a', weight: 30 }, { id: 'b', weight: 30 }, { id: 'c', weight: 0 }]);
+    expect(out.map((e) => e.weight)).toEqual([50, 50, 0]);
+  });
+
+  it('splits evenly when everything is 0 and always sums 100', () => {
+    const out = normalizeWeights([{ id: 'a', weight: 0 }, { id: 'b', weight: 0 }, { id: 'c', weight: 0 }]);
+    expect(out.reduce((acc, e) => acc + e.weight, 0)).toBeCloseTo(100);
+    expect(out.map((e) => e.weight)).toEqual([33.4, 33.3, 33.3]);
   });
 });

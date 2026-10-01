@@ -7,80 +7,46 @@ import { Surface } from '@/components/ui/surface';
 import { Text } from '@/components/ui/text';
 import type { ComparisonListBundle } from '@/domain';
 import { useTheme } from '@/hooks/use-theme';
-import type { FilterState, RecalcMode, SortDir, SortKey } from '@/state/use-list-view';
+import { useI18n } from '@/i18n';
+import type { SortDir, SortKey } from '@/state/use-list-view';
 
 type Props = {
   visible: boolean;
   bundle: ComparisonListBundle;
-  categoryColumn: ComparisonListBundle['columns'][number] | undefined;
   showPartials: boolean;
   sortKey: SortKey;
   sortDir: SortDir;
-  filter: FilterState;
-  recalcMode: RecalcMode;
-  visibleCount: number;
   onShowPartials: (value: boolean) => void;
   onSortKey: (key: SortKey) => void;
   onSortDir: (dir: SortDir) => void;
-  onFilter: (filter: FilterState) => void;
-  onClearFilter: () => void;
   onClose: () => void;
 };
 
+/** Hoja de «Ordenar y detalles» de la tabla. Los filtros viven en la propia pantalla. */
 export function ViewControlsModal({
   visible,
   bundle,
-  categoryColumn,
   showPartials,
   sortKey,
   sortDir,
-  filter,
-  recalcMode,
-  visibleCount,
   onShowPartials,
   onSortKey,
   onSortDir,
-  onFilter,
-  onClearFilter,
   onClose,
 }: Props) {
   const theme = useTheme();
+  const { t } = useI18n();
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={[styles.backdrop, { backgroundColor: 'rgba(15,14,23,0.45)' }]}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Cerrar opciones de vista"
-          style={StyleSheet.absoluteFill}
-          onPress={onClose}
-        />
-        <Surface
-          padded
-          elevation="lg"
-          style={[
-            styles.panel,
-            {
-              margin: theme.spacing[4],
-              gap: theme.spacing[4],
-            },
-          ]}
-        >
-          <ScrollView
-            style={styles.scroll}
-            contentContainerStyle={{ gap: theme.spacing[4] }}
-            showsVerticalScrollIndicator={false}
-          >
+      <View style={[styles.backdrop, { backgroundColor: 'rgba(20,22,43,0.45)' }]}>
+        <Pressable accessibilityRole="button" accessibilityLabel={t.common.close} style={StyleSheet.absoluteFill} onPress={onClose} />
+        <Surface padded elevation="lg" style={[styles.panel, { margin: theme.spacing[4], gap: theme.spacing[4] }]}>
+          <ScrollView style={styles.scroll} contentContainerStyle={{ gap: theme.spacing[5] }} showsVerticalScrollIndicator={false}>
             <View style={styles.titleRow}>
-              <View style={{ gap: theme.spacing[1] }}>
-                <Text variant="overline">Vista</Text>
-                <Text variant="subtitle">Opciones de la tabla</Text>
-              </View>
-              <Button title="Cerrar" size="sm" variant="ghost" onPress={onClose} />
+              <Text variant="subtitle">{t.ranking.sortAndDetails}</Text>
+              <Button title={t.common.close} size="sm" variant="ghost" onPress={onClose} />
             </View>
-
-            <PartialsToggle value={showPartials} onChange={onShowPartials} />
-
             <SortControls
               bundle={bundle}
               sortKey={sortKey}
@@ -89,40 +55,7 @@ export function ViewControlsModal({
               onSortKey={onSortKey}
               onSortDir={onSortDir}
             />
-
-            {categoryColumn ? (
-              <View style={{ gap: theme.spacing[2] }}>
-                <Text variant="overline">Filtro: {categoryColumn.name}</Text>
-                <View style={[styles.wrap, { gap: theme.spacing[2] }]}>
-                  <Button
-                    title="Todos"
-                    size="sm"
-                    pill
-                    variant={!filter.categoryValue ? 'primary' : 'secondary'}
-                    onPress={onClearFilter}
-                  />
-                  {(categoryColumn.options ?? []).map((option) => (
-                    <Button
-                      key={option}
-                      title={option}
-                      size="sm"
-                      pill
-                      variant={filter.categoryValue === option ? 'primary' : 'secondary'}
-                      onPress={() =>
-                        onFilter({
-                          categoryColumnId: categoryColumn.id,
-                          categoryValue: option,
-                        })
-                      }
-                    />
-                  ))}
-                </View>
-                <Text variant="caption" colorKey="textSecondary">
-                  Modo de cálculo: {recalcMode === 'visible' ? 'solo visibles' : 'toda la lista'} ·{' '}
-                  {visibleCount} items
-                </Text>
-              </View>
-            ) : null}
+            <PartialsToggle value={showPartials} onChange={onShowPartials} />
           </ScrollView>
         </Surface>
       </View>
@@ -131,26 +64,8 @@ export function ViewControlsModal({
 }
 
 const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    justifyContent: 'flex-start',
-    alignItems: 'flex-end',
-  },
-  panel: {
-    width: '90%',
-    maxWidth: 560,
-    maxHeight: '85%',
-  },
-  scroll: {
-    flexGrow: 0,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  wrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
+  backdrop: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  panel: { width: '92%', maxWidth: 560, maxHeight: '85%' },
+  scroll: { flexGrow: 0 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
 });

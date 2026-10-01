@@ -29,7 +29,6 @@ export function useListView(bundle: ComparisonListBundle | undefined) {
     categoryValue: null,
   });
   const [recalcMode, setRecalcMode] = useState<RecalcMode>('all');
-  const [pendingFilter, setPendingFilter] = useState<FilterState | null>(null);
 
   const visibleItems = useMemo(() => {
     if (!bundle) return [];
@@ -82,24 +81,15 @@ export function useListView(bundle: ComparisonListBundle | undefined) {
     return sorted;
   }, [bundle, ranked, sortKey, sortDir]);
 
-  function requestFilterChange(next: FilterState) {
-    setPendingFilter(next);
-  }
-
-  function applyPendingFilter(mode: RecalcMode) {
-    if (!pendingFilter) return;
-    setRecalcMode(mode);
-    setFilter(pendingFilter);
-    setPendingFilter(null);
+  /** Aplica un filtro directamente. Por defecto compara solo entre las opciones visibles. */
+  function applyFilter(next: FilterState) {
+    setFilter(next);
+    setRecalcMode('visible');
   }
 
   function clearFilter() {
     setFilter({ categoryColumnId: null, categoryValue: null });
     setRecalcMode('all');
-  }
-
-  function cancelPendingFilter() {
-    setPendingFilter(null);
   }
 
   return {
@@ -110,12 +100,10 @@ export function useListView(bundle: ComparisonListBundle | undefined) {
     showPartials,
     setShowPartials,
     filter,
-    pendingFilter,
-    requestFilterChange,
-    applyPendingFilter,
-    cancelPendingFilter,
     clearFilter,
+    applyFilter,
     recalcMode,
+    setRecalcMode,
     rows,
     visibleCount: visibleItems.length,
   };

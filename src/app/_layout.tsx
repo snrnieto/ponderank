@@ -1,13 +1,20 @@
 import '@/global.css';
 
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider, type Href } from 'expo-router';
+import Head from 'expo-router/head';
 import * as SplashScreen from 'expo-splash-screen';
 import * as SystemUI from 'expo-system-ui';
 import { useEffect, useMemo } from 'react';
-import { Platform } from 'react-native';
+import { Platform, View } from 'react-native';
 
+import { BrandTitle } from '@/components/ui/brand-title';
+import { AppearanceSwitcher } from '@/components/ui/appearance-switcher';
+import { LanguageSwitcher } from '@/components/ui/language-switcher';
+import { APP_NAME } from '@/constants/brand';
 import { useTheme } from '@/hooks/use-theme';
+import { I18nProvider, useI18n } from '@/i18n';
 import { HeaderBackButton } from '@/navigation/header-back-button';
+import { AppearanceProvider } from '@/state/appearance';
 import { ListsProvider } from '@/state/lists-context';
 
 SplashScreen.preventAutoHideAsync();
@@ -19,7 +26,7 @@ function withListBack(title: string) {
     return {
       title,
       headerLeft: () => (
-        <HeaderBackButton fallback={(listId ? `/lists/${listId}` : '/') as Href} />
+        <HeaderBackButton fallback={(listId ? `/list/${listId}` : '/list') as Href} />
       ),
     };
   };
@@ -27,6 +34,7 @@ function withListBack(title: string) {
 
 function RootNavigator() {
   const theme = useTheme();
+  const { t } = useI18n();
 
   const navigationTheme = useMemo(
     () => ({
@@ -51,6 +59,10 @@ function RootNavigator() {
 
   return (
     <ThemeProvider value={navigationTheme}>
+      <Head>
+        <title>{APP_NAME}</title>
+        <meta name="description" content={t.brand.description} />
+      </Head>
       <Stack
         screenOptions={{
           headerStyle: { backgroundColor: theme.colors.background },
@@ -67,15 +79,32 @@ function RootNavigator() {
           fullScreenGestureEnabled: Platform.OS === 'ios',
         }}
       >
-        <Stack.Screen name="index" options={{ title: 'Mis listas' }} />
+        <Stack.Screen name="index" options={{ title: APP_NAME, headerShown: false }} />
         <Stack.Screen
-          name="lists/[listId]/index"
-          options={{ title: 'Lista', headerLeft: () => <HeaderBackButton fallback="/" /> }}
+          name="list/index"
+          options={{
+            title: t.titles.lists,
+            headerTitle: () => <BrandTitle href={'/' as Href} />,
+            headerRight: () => (
+              <View style={{ flexDirection: 'row', gap: theme.spacing[2], marginRight: theme.spacing[2] }}>
+                <AppearanceSwitcher />
+                <LanguageSwitcher />
+              </View>
+            ),
+            // Es la pantalla base de la app: no tiene sentido volver a la landing con una flecha.
+            headerBackVisible: false,
+            headerLeft: () => null,
+            gestureEnabled: false,
+          }}
         />
-        <Stack.Screen name="lists/[listId]/schema" options={withListBack('Esquema')} />
-        <Stack.Screen name="lists/[listId]/items/new" options={withListBack('Nuevo item')} />
-        <Stack.Screen name="lists/[listId]/items/import" options={withListBack('Agregar masivo')} />
-        <Stack.Screen name="lists/[listId]/items/[itemId]" options={withListBack('Editar item')} />
+        <Stack.Screen
+          name="list/[listId]/index"
+          options={{ title: t.titles.list, headerLeft: () => <HeaderBackButton fallback={'/list' as Href} /> }}
+        />
+        <Stack.Screen name="list/[listId]/schema" options={withListBack(t.titles.schema)} />
+        <Stack.Screen name="list/[listId]/items/new" options={withListBack(t.titles.newOption)} />
+        <Stack.Screen name="list/[listId]/items/import" options={withListBack(t.titles.import)} />
+        <Stack.Screen name="list/[listId]/items/[itemId]" options={withListBack(t.titles.editOptionGeneric)} />
       </Stack>
     </ThemeProvider>
   );
@@ -83,8 +112,12 @@ function RootNavigator() {
 
 export default function RootLayout() {
   return (
-    <ListsProvider>
-      <RootNavigator />
-    </ListsProvider>
+    <AppearanceProvider>
+      <I18nProvider>
+        <ListsProvider>
+          <RootNavigator />
+        </ListsProvider>
+      </I18nProvider>
+    </AppearanceProvider>
   );
 }
