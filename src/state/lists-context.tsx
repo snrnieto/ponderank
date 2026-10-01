@@ -2,7 +2,16 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 
 import { createRepository } from '@/data/create-repository';
 import { createId } from '@/data/lists-repository';
-import type { ComparisonListBundle, FieldValue, Item, ListColumn, ListGlobal } from '@/domain';
+import {
+  planImport,
+  type ComparisonListBundle,
+  type FieldValue,
+  type ImportMode,
+  type ImportPlan,
+  type Item,
+  type ListColumn,
+  type ListGlobal,
+} from '@/domain';
 import type { ListsRepository } from '@/data/lists-repository';
 
 type ListsContextValue = {
@@ -15,7 +24,12 @@ type ListsContextValue = {
   getBundle: (listId: string) => ComparisonListBundle | undefined;
   saveItem: (listId: string, item: Item) => Promise<void>;
   removeItem: (listId: string, itemId: string) => Promise<void>;
-  importItems: (listId: string, rows: Record<string, FieldValue>[]) => Promise<void>;
+  removeItems: (listId: string, itemIds: string[]) => Promise<void>;
+  importItems: (
+    listId: string,
+    rows: Record<string, FieldValue>[],
+    mode: ImportMode,
+  ) => Promise<ImportPlan>;
   saveSchema: (
     listId: string,
     schema: { globals: ListGlobal[]; columns: ListColumn[] },
@@ -82,13 +96,27 @@ export function ListsProvider({
         await repository.deleteItem(listId, itemId);
         await refresh();
       },
-      importItems: async (listId, rows) => {
-        const createdAt = new Date().toISOString();
-        await repository.addItems(
-          listId,
-          rows.map((values) => ({ id: createId('item'), listId, values, createdAt })),
-        );
+      removeItems: async (listId, itemIds) => {
+        await repository.deleteItems(listId, itemIds);
         await refresh();
+      },
+      importItems: async (listId, rows, mode) => {
+        const createdAt = new Date().toISOString();
+        const stored = await repository.getBundle(listId);
+        const existing = stored?.items ?? [];
+        const plan = planImport(existing, stored?.columns ?? [], rows, mode, (values) => ({
+          id: createId('item'),
+          listId,
+          values,
+          createdAt,
+        }));
+        if (mode === 'append') {
+          await repository.addItems(listId, plan.items.slice(existing.length));
+        } else {
+          await repository.replaceItems(listId, plan.items);
+        }
+        await refresh();
+        return plan;
       },
       saveSchema: async (listId, schema) => {
         await repository.replaceSchema(listId, schema);

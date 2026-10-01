@@ -99,6 +99,19 @@ export function createAsyncStorageListsRepository(storage: MemoryStore): ListsRe
       });
     },
 
+    async deleteItems(listId, itemIds) {
+      const ids = new Set(itemIds);
+      await touch(listId, (bundle) => {
+        bundle.items = bundle.items.filter((i) => !ids.has(i.id));
+      });
+    },
+
+    async replaceItems(listId, items) {
+      await touch(listId, (bundle) => {
+        bundle.items = items.map((item) => ({ ...item, listId }));
+      });
+    },
+
     async replaceSchema(listId, schema: { globals: ListGlobal[]; columns: ListColumn[] }) {
       await touch(listId, (bundle) => {
         const removedIds = new Set(

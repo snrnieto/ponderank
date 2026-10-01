@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Surface } from '@/components/ui/surface';
 import { Text } from '@/components/ui/text';
 import type { ComparisonListBundle } from '@/domain';
@@ -22,6 +23,12 @@ type Props = {
   rows: Row[];
   showPartials: boolean;
   onEditItem: (itemId: string) => void;
+  /** Modo selección: cada fila muestra un checkbox y tocarla la (de)selecciona. */
+  selection?: {
+    selectedIds: Set<string>;
+    onToggle: (itemId: string) => void;
+    onToggleAll: (select: boolean) => void;
+  };
 };
 
 function formatValue(value: string | number | null | undefined): string {
@@ -41,7 +48,7 @@ function scoreTone(total: number): 'success' | 'warning' | 'danger' | 'primary' 
   return 'danger';
 }
 
-export function RankingTable({ bundle, rows, showPartials, onEditItem }: Props) {
+export function RankingTable({ bundle, rows, showPartials, onEditItem, selection }: Props) {
   const theme = useTheme();
   const [containerWidth, setContainerWidth] = useState(0);
   const imageCol = bundle.columns.find((c) => c.kind === 'image');
@@ -52,7 +59,11 @@ export function RankingTable({ bundle, rows, showPartials, onEditItem }: Props) 
   const dataCols = visibleCols.filter((c) => c.kind !== 'text').slice(0, 6);
   const partialCols = showPartials ? criteria : [];
 
+  const selectedCount = selection ? rows.filter((r) => selection.selectedIds.has(r.itemId)).length : 0;
+  const allSelected = rows.length > 0 && selectedCount === rows.length;
+
   const fixedMin =
+    (selection ? 30 : 0) +
     40 +
     (imageCol ? 52 : 0) +
     160 +
@@ -72,6 +83,16 @@ export function RankingTable({ bundle, rows, showPartials, onEditItem }: Props) 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ width: '100%' }}>
         <View style={{ gap: theme.spacing[3], width: tableWidth || fixedMin, paddingBottom: theme.spacing[2] }}>
           <View style={[styles.headerRow, { gap: theme.spacing[2], paddingHorizontal: theme.spacing[3] }]}>
+            {selection ? (
+              <View style={styles.checkCol}>
+                <Checkbox
+                  checked={allSelected}
+                  indeterminate={selectedCount > 0 && !allSelected}
+                  onChange={() => selection.onToggleAll(!allSelected)}
+                  accessibilityLabel="Seleccionar todos"
+                />
+              </View>
+            ) : null}
             <Text variant="overline" style={styles.rankCol}>
               #
             </Text>
@@ -106,7 +127,12 @@ export function RankingTable({ bundle, rows, showPartials, onEditItem }: Props) 
             const isTop = index < 3;
 
             return (
-              <Pressable key={row.itemId} onPress={() => onEditItem(row.itemId)}>
+              <Pressable
+                key={row.itemId}
+                onPress={() =>
+                  selection ? selection.onToggle(row.itemId) : onEditItem(row.itemId)
+                }
+              >
                 <Surface
                   padded
                   elevation="sm"
@@ -115,8 +141,19 @@ export function RankingTable({ bundle, rows, showPartials, onEditItem }: Props) 
                     alignItems: 'center',
                     gap: theme.spacing[2],
                     width: '100%',
+                    borderWidth: selection?.selectedIds.has(row.itemId) ? 2 : 0,
+                    borderColor: theme.colors.primary,
                   }}
                 >
+                  {selection ? (
+                    <View style={styles.checkCol}>
+                      <Checkbox
+                        checked={selection.selectedIds.has(row.itemId)}
+                        onChange={() => selection.onToggle(row.itemId)}
+                        accessibilityLabel={`Seleccionar ${row.name}`}
+                      />
+                    </View>
+                  ) : null}
                   {isTop ? (
                     <LinearGradient
                       colors={[...theme.gradients.brand]}
@@ -176,6 +213,7 @@ export function RankingTable({ bundle, rows, showPartials, onEditItem }: Props) 
 
 const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', alignItems: 'center', width: '100%' },
+  checkCol: { width: 30, flexShrink: 0, alignItems: 'flex-start' },
   rankCol: { width: 40, flexShrink: 0 },
   imgCol: { width: 52, flexShrink: 0 },
   nameFlex: { flex: 1, minWidth: 160 },

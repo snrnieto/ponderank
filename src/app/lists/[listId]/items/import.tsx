@@ -5,6 +5,7 @@ import { ScrollView, View } from 'react-native';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { confirmAction } from '@/components/ui/confirm-action';
 import { PageShell } from '@/components/ui/page-shell';
 import { Surface } from '@/components/ui/surface';
 import { Text } from '@/components/ui/text';
@@ -13,6 +14,8 @@ import {
   buildImportTemplate,
   editableColumns,
   parseImportText,
+  planImport,
+  type ImportMode,
   type ImportParseResult,
 } from '@/domain';
 import { useTheme } from '@/hooks/use-theme';
@@ -30,6 +33,7 @@ export default function BulkImportScreen() {
   const [result, setResult] = useState<ImportParseResult | null>(null);
   const [copied, setCopied] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [mode, setMode] = useState<ImportMode>('upsert');
 
   const listName = bundle?.list.name;
   const columns = bundle?.columns;
@@ -38,6 +42,14 @@ export default function BulkImportScreen() {
     () => (listName && columns ? buildImportTemplate(listName, columns) : ''),
     [listName, columns],
   );
+
+  const items = bundle?.items;
+  // Vista previa de lo que hará la importación (sin guardar nada).
+  const plan = useMemo(() => {
+    if (!items || !columns || !result?.ok) return null;
+    const rows = result.rows.filter((r) => r.errors.length === 0).map((r) => r.values);
+    return planImport(items, columns, rows, mode, (values) => ({ id: '', listId, values, createdAt: '' }));
+  }, [items, columns, result, mode, listId]);
 
   if (!bundle) {
     return (
@@ -62,6 +74,10 @@ export default function BulkImportScreen() {
 
   const validRows = result?.ok ? result.rows.filter((r) => r.errors.length === 0) : [];
   const invalidRows = result?.ok ? result.rows.filter((r) => r.errors.length > 0) : [];
+  const actionByRow = new Map(validRows.map((row, i) => [row.index, plan?.actions[i]]));
+  const added = plan?.added ?? 0;
+  const updated = plan?.updated ?? 0;
+  const removed = plan?.removed ?? 0;
 
   async function onCopy() {
     await Clipboard.setStringAsync(template);
@@ -69,16 +85,41 @@ export default function BulkImportScreen() {
     setTimeout(() => setCopied(false), 2000);
   }
 
-  async function onImport() {
-    if (validRows.length === 0) return;
+  async function runImport() {
     setImporting(true);
     try {
-      await importItems(listId, validRows.map((r) => r.values));
+      await importItems(
+        listId,
+        validRows.map((r) => r.values),
+        mode,
+      );
       safeGoBack(listHref);
     } finally {
       setImporting(false);
     }
   }
+
+  function onImport() {
+    if (validRows.length === 0) return;
+    if (mode === 'replace' && bundle!.items.length > 0) {
+      confirmAction(
+        'Reemplazar todos los items',
+        `Se borrarán los ${bundle!.items.length} items actuales y quedarán solo los ${validRows.length} importados.`,
+        () => void runImport(),
+        'Reemplazar',
+      );
+      return;
+    }
+    void runImport();
+  }
+
+  const importTitle = importing
+    ? 'Importando…'
+    : mode === 'replace'
+      ? `Reemplazar todo con ${validRows.length} item${validRows.length === 1 ? '' : 's'}`
+      : mode === 'upsert'
+        ? `Aplicar: ${added} nuevo${added === 1 ? '' : 's'}, ${updated} actualizado${updated === 1 ? '' : 's'}`
+        : `Importar ${validRows.length} item${validRows.length === 1 ? '' : 's'}`;
 
   const textAreaStyle = {
     height: undefined,
@@ -142,8 +183,35 @@ export default function BulkImportScreen() {
         {result?.ok ? (
           <Surface padded elevation="sm" style={{ gap: theme.spacing[3] }}>
             <Text variant="overline">3 · Vista previa</Text>
+            <View style={{ gap: theme.spacing[2] }}>
+              <Text variant="label">¿Qué hacer con los items que ya tiene la lista ({bundle.items.length})?</Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing[2] }}>
+                {IMPORT_MODES.map((m) => (
+                  <Button
+                    key={m.mode}
+                    title={m.label}
+                    size="sm"
+                    pill
+                    variant={mode === m.mode ? 'primary' : 'secondary'}
+                    onPress={() => setMode(m.mode)}
+                  />
+                ))}
+              </View>
+              <Text variant="caption" colorKey="textSecondary">
+                {IMPORT_MODES.find((m) => m.mode === mode)!.description}
+              </Text>
+            </View>
+
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing[2] }}>
-              <Badge tone="success" label={`${validRows.length} listos para importar`} />
+              {added > 0 ? (
+                <Badge tone="success" label={`${added} nuevo${added === 1 ? '' : 's'}`} />
+              ) : null}
+              {updated > 0 ? (
+                <Badge tone="info" label={`${updated} se actualiza${updated === 1 ? '' : 'n'}`} />
+              ) : null}
+              {removed > 0 ? (
+                <Badge tone="warning" label={`${removed} se borra${removed === 1 ? '' : 'n'}`} />
+              ) : null}
               {invalidRows.length > 0 ? (
                 <Badge tone="danger" label={`${invalidRows.length} con errores (se omiten)`} />
               ) : null}
@@ -168,9 +236,24 @@ export default function BulkImportScreen() {
                     backgroundColor: hasErrors ? theme.colors.dangerSoft : theme.colors.surfaceMuted,
                   }}
                 >
-                  <Text variant="label">
-                    {row.index}. {name ?? 'Sin nombre'}
-                  </Text>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: theme.spacing[2],
+                    }}
+                  >
+                    <Text variant="label" style={{ flexShrink: 1 }}>
+                      {row.index}. {name ?? 'Sin nombre'}
+                    </Text>
+                    {actionByRow.get(row.index) ? (
+                      <Badge
+                        tone={actionByRow.get(row.index) === 'update' ? 'info' : 'success'}
+                        label={actionByRow.get(row.index) === 'update' ? 'Actualiza' : 'Nuevo'}
+                      />
+                    ) : null}
+                  </View>
                   {row.errors.map((e) => (
                     <Text key={e} variant="caption" colorKey="danger">
                       ✕ {e}
@@ -186,14 +269,11 @@ export default function BulkImportScreen() {
             })}
 
             <Button
-              title={
-                importing
-                  ? 'Importando…'
-                  : `Importar ${validRows.length} item${validRows.length === 1 ? '' : 's'}`
-              }
+              title={importTitle}
               pill
+              variant={mode === 'replace' ? 'danger' : 'primary'}
               disabled={validRows.length === 0 || importing}
-              onPress={() => void onImport()}
+              onPress={onImport}
             />
           </Surface>
         ) : null}
@@ -203,6 +283,25 @@ export default function BulkImportScreen() {
     </ScrollView>
   );
 }
+
+const IMPORT_MODES: { mode: ImportMode; label: string; description: string }[] = [
+  {
+    mode: 'upsert',
+    label: 'Actualizar por nombre',
+    description:
+      'Si el Nombre coincide con un item existente se actualizan sus valores (los vacíos se conservan); si no existe, se agrega.',
+  },
+  {
+    mode: 'append',
+    label: 'Agregar',
+    description: 'Todos se agregan como items nuevos, aunque se repitan nombres.',
+  },
+  {
+    mode: 'replace',
+    label: 'Reemplazar todo',
+    description: 'Se borran todos los items actuales y quedan solo los importados.',
+  },
+];
 
 function displayName(
   values: Record<string, unknown>,

@@ -56,4 +56,18 @@ describe('AsyncStorageListsRepository', () => {
     const bundles = await repo.loadAll();
     expect(bundles).toHaveLength(1);
   });
+
+  it('deletes and replaces items in bulk', async () => {
+    process.env.EXPO_PUBLIC_ENABLE_DEMO_SEED = 'false';
+    const repo = createAsyncStorageListsRepository(memoryStorage());
+    const { list } = await repo.createList('IA');
+    const item = (id: string) => ({ id, listId: list.id, createdAt: '', values: { n: id } });
+    await repo.addItems(list.id, [item('a'), item('b'), item('c')]);
+
+    await repo.deleteItems(list.id, ['a', 'c']);
+    expect((await repo.getBundle(list.id))!.items.map((i) => i.id)).toEqual(['b']);
+
+    await repo.replaceItems(list.id, [item('x'), item('y')]);
+    expect((await repo.getBundle(list.id))!.items.map((i) => i.id)).toEqual(['x', 'y']);
+  });
 });

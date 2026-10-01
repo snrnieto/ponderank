@@ -7,6 +7,7 @@ import { FilterRecalcModal } from '@/components/list/filter-recalc-modal';
 import { RankingTable } from '@/components/list/ranking-table';
 import { ViewControlsModal } from '@/components/list/view-controls-modal';
 import { Button } from '@/components/ui/button';
+import { confirmAction } from '@/components/ui/confirm-action';
 import { GradientCard } from '@/components/ui/gradient-card';
 import { PageShell } from '@/components/ui/page-shell';
 import { Text } from '@/components/ui/text';
@@ -16,13 +17,15 @@ import { useListView } from '@/state/use-list-view';
 
 export default function ListDetailScreen() {
   const { listId } = useLocalSearchParams<{ listId: string }>();
-  const { getBundle } = useLists();
+  const { getBundle, removeItems } = useLists();
   const bundle = getBundle(listId);
   const view = useListView(bundle);
   const theme = useTheme();
   const router = useRouter();
   const navigation = useNavigation();
   const [controlsVisible, setControlsVisible] = useState(false);
+  const [selecting, setSelecting] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!bundle) return;
@@ -56,6 +59,35 @@ export default function ListDetailScreen() {
   );
 
   const leader = view.rows[0];
+
+  function exitSelection() {
+    setSelecting(false);
+    setSelectedIds(new Set());
+  }
+
+  function toggleSelected(itemId: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(itemId)) next.delete(itemId);
+      else next.add(itemId);
+      return next;
+    });
+  }
+
+  function onDeleteSelected() {
+    const ids = [...selectedIds];
+    if (ids.length === 0) return;
+    const total = bundle?.items.length ?? 0;
+    confirmAction(
+      ids.length === 1 ? 'Eliminar 1 item' : `Eliminar ${ids.length} items`,
+      ids.length === total
+        ? 'Se eliminarán todos los items de la lista. Esta acción no se puede deshacer.'
+        : 'Esta acción no se puede deshacer.',
+      () => {
+        void removeItems(listId, ids).then(exitSelection);
+      },
+    );
+  }
 
   if (!bundle) {
     return (
@@ -103,6 +135,46 @@ export default function ListDetailScreen() {
           </View>
         </GradientCard>
 
+        {selecting ? (
+          <View
+            style={{
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              gap: theme.spacing[2],
+            }}
+          >
+            <Text variant="label" style={{ marginRight: theme.spacing[2] }}>
+              {selectedIds.size} seleccionado{selectedIds.size === 1 ? '' : 's'}
+            </Text>
+            <Button
+              title={
+                view.rows.every((r) => selectedIds.has(r.itemId)) && view.rows.length > 0
+                  ? 'Quitar selección'
+                  : `Seleccionar todos (${view.rows.length})`
+              }
+              variant="secondary"
+              size="sm"
+              pill
+              onPress={() =>
+                setSelectedIds(
+                  view.rows.every((r) => selectedIds.has(r.itemId))
+                    ? new Set()
+                    : new Set(view.rows.map((r) => r.itemId)),
+                )
+              }
+            />
+            <Button
+              title={`Eliminar (${selectedIds.size})`}
+              variant="danger"
+              size="sm"
+              pill
+              disabled={selectedIds.size === 0}
+              onPress={onDeleteSelected}
+            />
+            <Button title="Cancelar" variant="ghost" size="sm" pill onPress={exitSelection} />
+          </View>
+        ) : (
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing[2] }}>
           <Button
             title="Esquema"
@@ -124,13 +196,33 @@ export default function ListDetailScreen() {
             pill
             onPress={() => router.push(`/lists/${listId}/items/import` as Href)}
           />
+          {bundle.items.length > 0 ? (
+            <Button
+              title="Seleccionar"
+              variant="ghost"
+              size="sm"
+              pill
+              onPress={() => setSelecting(true)}
+            />
+          ) : null}
         </View>
+        )}
 
         <RankingTable
           bundle={bundle}
           rows={view.rows}
           showPartials={view.showPartials}
           onEditItem={(id) => router.push(`/lists/${listId}/items/${id}` as Href)}
+          selection={
+            selecting
+              ? {
+                  selectedIds,
+                  onToggle: toggleSelected,
+                  onToggleAll: (select) =>
+                    setSelectedIds(select ? new Set(view.rows.map((r) => r.itemId)) : new Set()),
+                }
+              : undefined
+          }
         />
       </PageShell>
 

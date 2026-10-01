@@ -43,7 +43,7 @@ export function assertWeightsSumTo100(weights: number[]): {
 
 export function resolveTargetValue(
   target: RankTarget,
-  values: Array<number | null | undefined>,
+  values: (number | null | undefined)[],
 ): number | null {
   if (target.mode === 'custom') {
     return target.customValue ?? null;

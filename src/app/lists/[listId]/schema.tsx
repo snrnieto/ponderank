@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   LayoutAnimation,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -19,6 +18,7 @@ import { OperandPicker } from '@/components/schema/operand-picker';
 import { WeightSummary } from '@/components/schema/weight-summary';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { confirmAction } from '@/components/ui/confirm-action';
 import { Surface } from '@/components/ui/surface';
 import { Grid } from '@/components/ui/grid';
 import { Text } from '@/components/ui/text';
@@ -26,6 +26,8 @@ import { TextInput } from '@/components/ui/text-input';
 import { createId } from '@/data/lists-repository';
 import {
   buildRankExample,
+  buildTargetPreview,
+  collectColumnValues,
   CALC_OPS,
   canSaveSchema,
   formatCalcFormula,
@@ -34,6 +36,7 @@ import {
   RECOMMENDED_TARGET,
   TARGET_MODE_HELP,
   type CalcOp,
+  type Item,
   type ListColumn,
   type ListGlobal,
   type RankDirection,
@@ -58,21 +61,6 @@ const KIND_LABELS: Record<ListColumn['kind'], string> = {
   calculated: 'cálculo',
   criterion: 'criterio',
 };
-
-function confirmAction(title: string, message: string, onConfirm: () => void) {
-  if (Platform.OS === 'web') {
-    const ok =
-      typeof globalThis !== 'undefined' &&
-      'confirm' in globalThis &&
-      (globalThis as { confirm: (m: string) => boolean }).confirm(`${title}\n\n${message}`);
-    if (ok) onConfirm();
-    return;
-  }
-  Alert.alert(title, message, [
-    { text: 'Cancelar', style: 'cancel' },
-    { text: 'Eliminar', style: 'destructive', onPress: onConfirm },
-  ]);
-}
 
 export default function SchemaScreen() {
   const { listId } = useLocalSearchParams<{ listId: string }>();
@@ -241,6 +229,7 @@ export default function SchemaScreen() {
     .map((c) => ({ id: c.id, name: c.name, weight: c.rank!.weight }));
   const rankedColumns = columns.filter((c) => c.rank);
   const dataColumns = columns.filter((c) => !c.rank);
+  const items = bundle.items;
 
   function renderColumnCard(column: ListColumn) {
     const focused = focusedColumnId === column.id;
@@ -319,7 +308,15 @@ export default function SchemaScreen() {
           />
         ) : null}
 
-        {column.rank ? <RankEditor column={column} onChange={updateColumn} /> : null}
+        {column.rank ? (
+          <RankEditor
+            column={column}
+            columns={columns}
+            globals={globals}
+            items={items}
+            onChange={updateColumn}
+          />
+        ) : null}
       </View>
     );
   }
@@ -701,16 +698,63 @@ function CalcEditor({
   );
 }
 
+function formatNumber(value: number): string {
+  return value.toLocaleString('es-CO', { maximumFractionDigits: 2 });
+}
+
 function RankEditor({
   column,
+  columns,
+  globals,
+  items,
   onChange,
 }: {
   column: ListColumn;
+  columns: ListColumn[];
+  globals: ListGlobal[];
+  items: Item[];
   onChange: (c: ListColumn) => void;
 }) {
   const theme = useTheme();
   const rank = column.rank!;
   const example = buildRankExample(rank.direction, rank.target.mode);
+  // Objetivos calculados con los datos reales de la lista (incluye cambios sin guardar del esquema).
+  const preview = buildTargetPreview(
+    collectColumnValues(items, columns, globals, column.id),
+    rank.direction,
+    rank.target,
+  );
+
+  function targetButtonLabel(mode: TargetMode): string {
+    const base = TARGET_MODE_HELP[mode].label;
+    const value =
+      !preview || mode === 'custom'
+        ? null
+        : mode === 'min'
+          ? preview.min.value
+          : mode === 'max'
+            ? preview.max.value
+            : preview.avg;
+    const withValue = value == null ? base : `${base} · ${formatNumber(value)}`;
+    return mode === RECOMMENDED_TARGET[rank.direction] ? `${withValue} ★` : withValue;
+  }
+
+  const targetDetail = !preview
+    ? TARGET_MODE_HELP[rank.target.mode].description
+    : rank.target.mode === 'min'
+      ? `Objetivo: ${formatNumber(preview.min.value)} — ${preview.min.name}. Ese item saca 100 puntos.`
+      : rank.target.mode === 'max'
+        ? `Objetivo: ${formatNumber(preview.max.value)} — ${preview.max.name}. Ese item saca 100 puntos.`
+        : rank.target.mode === 'avg'
+          ? `Objetivo: ${formatNumber(preview.avg)}, el promedio de ${preview.count} items.`
+          : TARGET_MODE_HELP.custom.description;
+
+  const allMax = preview ? preview.rows.length > 1 && preview.rows.every((row) => row.score === 100) : false;
+  const warning = preview
+    ? allMax
+      ? (example.warning ?? 'Con este objetivo todos sacan 100 y el criterio no diferencia a los items.')
+      : undefined
+    : example.warning;
 
   const controls = (
     <View style={{ gap: theme.spacing[3] }}>
@@ -777,11 +821,7 @@ function RankEditor({
           {(['min', 'max', 'avg', 'custom'] as TargetMode[]).map((mode) => (
             <Button
               key={mode}
-              title={
-                mode === RECOMMENDED_TARGET[rank.direction]
-                  ? `${TARGET_MODE_HELP[mode].label} ★`
-                  : TARGET_MODE_HELP[mode].label
-              }
+              title={targetButtonLabel(mode)}
               size="sm"
               pill
               variant={rank.target.mode === mode ? 'primary' : 'secondary'}
@@ -815,7 +855,7 @@ function RankEditor({
           ) : null}
         </View>
         <Text variant="caption" colorKey="textSecondary">
-          {TARGET_MODE_HELP[rank.target.mode].description} ★ = recomendado para “
+          {targetDetail} ★ = recomendado para “
           {RANK_DIRECTION_HELP[rank.direction].label.toLowerCase()}”.
         </Text>
       </View>
@@ -831,17 +871,27 @@ function RankEditor({
         backgroundColor: theme.colors.surfaceMuted,
       }}
     >
-      <Text variant="overline">Ejemplo con esta configuración</Text>
-      <Text variant="caption">{example.summary}</Text>
-      {example.rows.map((row) => (
-        <View key={row.name} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <Text variant="caption" colorKey="textSecondary">
+      <Text variant="overline">
+        {preview ? `Con tus datos (${preview.count} items)` : 'Ejemplo con esta configuración'}
+      </Text>
+      <Text variant="caption">
+        {preview ? 'Mejor, intermedio y peor en este criterio:' : example.summary}
+      </Text>
+      {(preview
+        ? preview.rows.map((row) => ({ ...row, value: formatNumber(row.value) }))
+        : example.rows
+      ).map((row, i) => (
+        <View
+          key={`${row.name}-${i}`}
+          style={{ flexDirection: 'row', justifyContent: 'space-between', gap: theme.spacing[2] }}
+        >
+          <Text variant="caption" colorKey="textSecondary" numberOfLines={1} style={{ flexShrink: 1 }}>
             {row.name} · {row.value}
           </Text>
           <Text variant="caption">{row.score} pts</Text>
         </View>
       ))}
-      {example.warning ? (
+      {warning ? (
         <Text
           variant="caption"
           style={{
@@ -851,7 +901,7 @@ function RankEditor({
             backgroundColor: theme.colors.warningSoft,
           }}
         >
-          ⚠ {example.warning}
+          ⚠ {warning}
         </Text>
       ) : null}
     </View>

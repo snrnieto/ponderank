@@ -1,15 +1,29 @@
 import '@/global.css';
 
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider, type Href } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import * as SystemUI from 'expo-system-ui';
 import { useEffect, useMemo } from 'react';
 import { Platform } from 'react-native';
 
 import { useTheme } from '@/hooks/use-theme';
+import { HeaderBackButton } from '@/navigation/header-back-button';
 import { ListsProvider } from '@/state/lists-context';
 
 SplashScreen.preventAutoHideAsync();
+
+/** Opciones para pantallas hijas de una lista: volver lleva a la lista si no hay historial. */
+function withListBack(title: string) {
+  return ({ route }: { route: { params?: object } }) => {
+    const listId = (route.params as { listId?: string } | undefined)?.listId;
+    return {
+      title,
+      headerLeft: () => (
+        <HeaderBackButton fallback={(listId ? `/lists/${listId}` : '/') as Href} />
+      ),
+    };
+  };
+}
 
 function RootNavigator() {
   const theme = useTheme();
@@ -54,11 +68,14 @@ function RootNavigator() {
         }}
       >
         <Stack.Screen name="index" options={{ title: 'Mis listas' }} />
-        <Stack.Screen name="lists/[listId]/index" options={{ title: 'Lista' }} />
-        <Stack.Screen name="lists/[listId]/schema" options={{ title: 'Esquema' }} />
-        <Stack.Screen name="lists/[listId]/items/new" options={{ title: 'Nuevo item' }} />
-        <Stack.Screen name="lists/[listId]/items/import" options={{ title: 'Agregar masivo' }} />
-        <Stack.Screen name="lists/[listId]/items/[itemId]" options={{ title: 'Editar item' }} />
+        <Stack.Screen
+          name="lists/[listId]/index"
+          options={{ title: 'Lista', headerLeft: () => <HeaderBackButton fallback="/" /> }}
+        />
+        <Stack.Screen name="lists/[listId]/schema" options={withListBack('Esquema')} />
+        <Stack.Screen name="lists/[listId]/items/new" options={withListBack('Nuevo item')} />
+        <Stack.Screen name="lists/[listId]/items/import" options={withListBack('Agregar masivo')} />
+        <Stack.Screen name="lists/[listId]/items/[itemId]" options={withListBack('Editar item')} />
       </Stack>
     </ThemeProvider>
   );

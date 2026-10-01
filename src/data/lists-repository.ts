@@ -11,6 +11,10 @@ export type ListsRepository = {
   /** Append several new items in one write (bulk import). */
   addItems(listId: string, items: Item[]): Promise<void>;
   deleteItem(listId: string, itemId: string): Promise<void>;
+  /** Delete several items in one write (bulk delete). */
+  deleteItems(listId: string, itemIds: string[]): Promise<void>;
+  /** Replace every item of the list in one write (bulk import update/replace). */
+  replaceItems(listId: string, items: Item[]): Promise<void>;
   replaceSchema(
     listId: string,
     schema: { globals: ListGlobal[]; columns: ListColumn[] },

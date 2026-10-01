@@ -85,7 +85,7 @@ export type ImportParseResult =
   | { ok: true; rows: ImportRow[]; warnings: string[] }
   | { ok: false; error: string };
 
-function normalizeKey(key: string): string {
+export function normalizeKey(key: string): string {
   return key
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')

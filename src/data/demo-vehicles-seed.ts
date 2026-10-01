@@ -100,7 +100,7 @@ export function buildDemoVehiclesBundle(): ComparisonListBundle {
     },
   ];
 
-  const rows: Array<{
+  const rows: {
     name: string;
     tipo: string;
     precio: number;
@@ -108,7 +108,7 @@ export function buildDemoVehiclesBundle(): ComparisonListBundle {
     consumo: number;
     accel: number;
     image: string;
-  }> = [
+  }[] = [
     {
       name: 'Suzuki Swift 1.2 GLX Hybrid',
       tipo: 'Hibrido gasolina',
